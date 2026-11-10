@@ -1,4 +1,4 @@
-const CACHE_NAME = 'audittech-v2.2';
+const CACHE_NAME = 'audittech-v2.3';
 
 const APP_SHELL = [
   './',
@@ -48,21 +48,22 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // App shell — Cache First
+  // App shell (index.html) — Network First pour recevoir les mises à jour
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(event.request).then(cached => {
-        return cached || fetch(event.request).then(response => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return response;
-        });
-      }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+      fetch(event.request).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
+        return response;
+      }).catch(() => {
+        return caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+        });
       })
     );
     return;
