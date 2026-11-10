@@ -5904,6 +5904,7 @@ function deleteHistoryItem(idx){
 // ============================================================
 var _fbApp = null, _fbAuth = null, _fbDb = null, _fbUser = null;
 var _fbSyncPaused = false, _fbSyncTimer = null;
+var _fbSessionId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 var _fbLoaded = false;
 
 var FIREBASE_CONFIG = {
@@ -6107,6 +6108,7 @@ function pushToCloud(){
     buildCloudPayload().then(function(payload){
       payload._lastSync = Date.now();
       payload._device = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+      payload._sessionId = _fbSessionId;
       payload._auditId = _currentAuditId || '';
       // Vérifier la taille (limite Firebase ~10MB)
       var json = JSON.stringify(payload);
@@ -6116,6 +6118,7 @@ function pushToCloud(){
         var lite = buildTransferPayload(false);
         lite._lastSync = payload._lastSync;
         lite._device = payload._device;
+        lite._sessionId = _fbSessionId;
         lite._auditId = payload._auditId;
         lite._noPhotos = true;
         _fbDb.ref(path).set(lite).catch(function(err){
@@ -6147,9 +6150,8 @@ function listenForCloudChanges(){
     if(_fbSyncPaused) return;
     var data = snapshot.val();
     if(!data || !data.v) return;
-    // Ne pas écraser si c'est notre propre push (même device, même seconde)
-    var myDevice = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
-    if(data._device === myDevice && data._lastSync && (Date.now() - data._lastSync < 3000)) return;
+    // Ne pas écraser si c'est notre propre push (même session)
+    if(data._sessionId === _fbSessionId) return;
     // Importer les données cloud
     importCloudData(data);
   });
@@ -6203,17 +6205,17 @@ function importCloudData(data){
   }catch(e){
     console.warn('importCloudData error:', e);
   }
-  setTimeout(function(){ _fbSyncPaused = false; }, 2000);
+  setTimeout(function(){ _fbSyncPaused = false; }, 4000);
 }
 
 // Debounced cloud push — appelé après chaque saveState
 var _cloudPushTimer = null;
 function scheduleCloudPush(){
-  if(!_fbUser) return;
+  if(!_fbUser || _fbSyncPaused) return;
   clearTimeout(_cloudPushTimer);
   _cloudPushTimer = setTimeout(function(){
-    pushToCloud();
-  }, 2000);
+    if(!_fbSyncPaused) pushToCloud();
+  }, 2500);
 }
 
 // Auto-init : tenter la reconnexion si déjà authentifié
