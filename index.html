@@ -1855,8 +1855,16 @@ function saveState(){
   }
 
   showToast();
+  // Horodatage de la dernière modification locale (sert à arbitrer avec le cloud)
+  setLocalLastMod(Date.now());
   // Push vers Firebase Cloud si connecté
   scheduleCloudPush();
+}
+function getLocalLastMod(){
+  try{ return parseInt(localStorage.getItem('audittech_lastmod')||'0',10) || 0; }catch(e){ return 0; }
+}
+function setLocalLastMod(t){
+  try{ localStorage.setItem('audittech_lastmod', String(t)); }catch(e){}
 }
 
 let toastTimer;
@@ -5960,9 +5968,7 @@ function initFirebase(){
     if(user){
       syncLog('👤 Connecté: ' + user.email + ' (uid=' + user.uid.slice(0,8) + '...)');
       syncLog('🆔 Session: ' + _fbSessionId);
-      listenForCloudChanges();
-      // Premier push légèrement différé pour laisser le listener s'attacher
-      setTimeout(function(){ pushToCloud(); }, 1000);
+      initialCloudSync();
     } else {
       syncLog('👤 Non connecté');
     }
@@ -6135,6 +6141,7 @@ function pushToCloud(){
       // Nettoyer les undefined récursivement (Firebase les refuse)
       var payload = JSON.parse(JSON.stringify(rawPayload));
       payload._lastSync = Date.now();
+      setLocalLastMod(payload._lastSync);
       payload._device = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
       payload._sessionId = _fbSessionId;
       payload._auditId = _currentAuditId || '';
@@ -6170,6 +6177,72 @@ function pushToCloud(){
   }
 }
 
+// Résumé lisible d'un état (local ou cloud) pour aider à choisir
+function summarizeAudit(ad, tr){
+  var site = (ad && ad['a-site']) || '(sans nom)';
+  var eq = 0, ph = 0;
+  Object.values(tr||{}).forEach(function(d){
+    if(!d) return;
+    var list = d.eq || d.equips || {};
+    Object.values(list).forEach(function(e){
+      if(!e) return;
+      if(e.e || e.etat || e.o || e.obs) eq++;
+      var p = e.ph || e.photos || [];
+      ph += p.filter(function(x){ return x; }).length;
+    });
+  });
+  return { site: site, eq: eq, ph: ph, empty: (eq === 0 && ph === 0 && !(ad && ad['a-site'])) };
+}
+
+// À la connexion : on lit d'abord le cloud, on ne l'écrase jamais à l'aveugle
+function initialCloudSync(){
+  var path = getCloudPath();
+  if(!path) return;
+  _fbSyncPaused = true;
+  syncLog('🔍 Lecture initiale du cloud...');
+  _fbDb.ref(path).once('value').then(function(snap){
+    var cloud = snap.val();
+    var local = summarizeAudit(S.adminData, S.terrain);
+    var localMod = getLocalLastMod();
+    _fbSyncPaused = false;
+    if(!cloud || !cloud.v){
+      syncLog('☁️ Cloud vide → envoi des données locales');
+      pushToCloud();
+    } else {
+      var c = summarizeAudit(cloud.ad, cloud.tr);
+      var cloudMod = cloud._lastSync || 0;
+      syncLog('☁️ Cloud: ' + c.site + ', ' + c.eq + ' équip., ' + c.ph + ' photos, ' + new Date(cloudMod).toLocaleString());
+      syncLog('📱 Local: ' + local.site + ', ' + local.eq + ' équip., ' + local.ph + ' photos, ' + (localMod ? new Date(localMod).toLocaleString() : 'date inconnue'));
+      if(local.empty){
+        syncLog('→ Appareil vide : récupération du cloud');
+        importCloudData(cloud);
+      } else if(c.empty){
+        syncLog('→ Cloud vide : envoi des données locales');
+        pushToCloud();
+      } else if(localMod && cloudMod === localMod){
+        syncLog('→ Déjà synchronisé');
+      } else {
+        var msg = 'Deux versions de l\'audit existent :\n\n' +
+          '☁️ CLOUD : ' + c.site + ' — ' + c.eq + ' équipements, ' + c.ph + ' photos\n   (' + new Date(cloudMod).toLocaleString() + ', ' + (cloud._device||'?') + ')\n\n' +
+          '💻 CET APPAREIL : ' + local.site + ' — ' + local.eq + ' équipements, ' + local.ph + ' photos\n   (' + (localMod ? new Date(localMod).toLocaleString() : 'date inconnue') + ')\n\n' +
+          'OK = récupérer la version CLOUD sur cet appareil\nAnnuler = envoyer la version de CET APPAREIL vers le cloud';
+        if(confirm(msg)){
+          syncLog('→ Choix : récupérer le cloud');
+          importCloudData(cloud);
+        } else {
+          syncLog('→ Choix : envoyer cet appareil');
+          pushToCloud();
+        }
+      }
+    }
+    listenForCloudChanges();
+  }).catch(function(err){
+    _fbSyncPaused = false;
+    syncLog('❌ Lecture initiale impossible: ' + err.code + ' — ' + err.message);
+    listenForCloudChanges();
+  });
+}
+
 var _fbListener = null;
 function listenForCloudChanges(){
   if(!_fbUser || !_fbDb){
@@ -6186,10 +6259,6 @@ function listenForCloudChanges(){
   syncLog('👂 Listener attaché sur ' + path);
   _fbDb.ref(path).on('value', function(snapshot){
     syncLog('📥 Données reçues du cloud');
-    if(_fbSyncPaused){
-      syncLog('⏭️ Import ignoré (sync en pause)');
-      return;
-    }
     var data = snapshot.val();
     if(!data){
       syncLog('ℹ️ Aucune donnée dans le cloud (null)');
@@ -6202,6 +6271,10 @@ function listenForCloudChanges(){
     // Ne pas écraser si c'est notre propre push (même session)
     if(data._sessionId === _fbSessionId){
       syncLog('⏭️ C\'est notre propre push (session ' + _fbSessionId.slice(0,6) + ')');
+      return;
+    }
+    if(data._lastSync && data._lastSync <= getLocalLastMod()){
+      syncLog('⏭️ Données cloud déjà à jour localement');
       return;
     }
     syncLog('📥 Import depuis session ' + (data._sessionId||'?').slice(0,6) + ' device=' + (data._device||'?'));
@@ -6230,28 +6303,35 @@ function importCloudData(data){
       S.coverPhoto = data.cp;
       try{ localStorage.setItem('audittech_cover_photo', data.cp); }catch(e){}
     }
+    // Le terrain est REMPLACÉ par la version cloud (pas de mélange avec l'ancien audit local)
+    var oldTerrain = {};
+    Object.keys(S.terrain || {}).forEach(function(k){ oldTerrain[k] = S.terrain[k]; });
+    Object.keys(S.terrain || {}).forEach(function(dId){
+      S.terrain[dId] = {loc:'', equips:{}};
+    });
     if(data.tr){
       Object.entries(data.tr).forEach(function(entry){
         var dId = entry[0], dData = entry[1];
+        if(!dData) return;
         if(!S.terrain[dId]) S.terrain[dId] = {loc:'', equips:{}};
-        if(dData.loc !== undefined) S.terrain[dId].loc = dData.loc;
-        if(dData.eq){
-          Object.entries(dData.eq).forEach(function(eEntry){
-            var eId = eEntry[0], eq = eEntry[1];
-            if(!S.terrain[dId].equips[eId]) S.terrain[dId].equips[eId] = {etat:'', crit:'', obs:'', photos:[]};
-            S.terrain[dId].equips[eId].etat = eq.e || '';
-            S.terrain[dId].equips[eId].crit = eq.c || '';
-            if(eq.o !== undefined) S.terrain[dId].equips[eId].obs = eq.o;
-            // Restaurer les photos depuis le cloud
-            if(eq.ph && eq.ph.length){
-              S.terrain[dId].equips[eId].photos = eq.ph.slice();
-            }
-          });
-        }
+        S.terrain[dId].loc = dData.loc || '';
+        Object.entries(dData.eq || {}).forEach(function(eEntry){
+          var eId = eEntry[0], eq = eEntry[1];
+          if(!eq) return;
+          var photos = [];
+          if(eq.ph && eq.ph.length){
+            photos = eq.ph.slice();
+          } else if(data._noPhotos && oldTerrain[dId] && oldTerrain[dId].equips && oldTerrain[dId].equips[eId]){
+            // Cloud envoyé sans photos (trop lourd) : on garde les photos locales
+            photos = oldTerrain[dId].equips[eId].photos || [];
+          }
+          S.terrain[dId].equips[eId] = {etat: eq.e || '', crit: eq.c || '', obs: eq.o || '', photos: photos};
+        });
       });
     }
     // Sauvegarder localement SANS re-pousser vers le cloud
     saveStateLocal();
+    setLocalLastMod(data._lastSync || Date.now());
     // Rafraîchir la page visible
     try{ goToPage(_currentPage); }catch(e){}
     updateProgress();
@@ -6304,16 +6384,15 @@ function saveStateLocal(){
 
 // Debounced cloud push — appelé après chaque saveState
 var _cloudPushTimer = null;
-function scheduleCloudPush(){
-  if(!_fbUser || _fbSyncPaused){
-    return;
-  }
+function scheduleCloudPush(delay){
+  if(!_fbUser) return;
   clearTimeout(_cloudPushTimer);
-  syncLog('⏱️ Push programmé dans 2.5s');
+  syncLog('⏱️ Envoi programmé');
   _cloudPushTimer = setTimeout(function(){
-    if(!_fbSyncPaused) pushToCloud();
-    else syncLog('⏭️ Push annulé (sync en pause)');
-  }, 2500);
+    // Si une synchro est en cours, on réessaie plus tard au lieu de perdre la modif
+    if(_fbSyncPaused){ scheduleCloudPush(1000); return; }
+    pushToCloud();
+  }, delay || 2500);
 }
 
 // Auto-init : tenter la reconnexion si déjà authentifié
@@ -6331,59 +6410,96 @@ window.addEventListener('load', function(){
 
 // === PANNEAU DIAGNOSTIC SYNC ===
 function showSyncDiag(){
-  var lines = ['=== DIAGNOSTIC SYNC ==='];
-  lines.push('Session ID: ' + _fbSessionId);
-  lines.push('Firebase SDK chargé: ' + _fbLoaded);
-  lines.push('Firebase App: ' + !!_fbApp);
-  lines.push('Firebase Auth: ' + !!_fbAuth);
-  lines.push('Firebase DB: ' + !!_fbDb);
-  lines.push('User connecté: ' + !!_fbUser);
-  if(_fbUser) lines.push('Email: ' + _fbUser.email);
-  if(_fbUser) lines.push('UID: ' + _fbUser.uid);
-  lines.push('Listener actif: ' + !!_fbListener);
-  if(_fbListener) lines.push('Listener path: ' + _fbListener);
-  lines.push('Sync en pause: ' + _fbSyncPaused);
-  lines.push('');
-  lines.push('=== LOG RÉCENT ===');
-  _syncLog.forEach(function(l){ lines.push(l); });
-  if(_syncLog.length === 0) lines.push('(aucun événement)');
-
-  // Test de connectivité Firebase
-  lines.push('');
-  lines.push('=== TEST EN COURS ===');
-
   var modal = document.createElement('div');
+  modal.id = 'diag-modal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
   modal.onclick = function(e){ if(e.target===modal) document.body.removeChild(modal); };
   var card = document.createElement('div');
-  card.style.cssText = 'background:#fff;border-radius:12px;padding:20px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;font:13px/1.6 monospace;white-space:pre-wrap;word-break:break-all';
-  card.textContent = lines.join('\n');
+  card.style.cssText = 'background:#fff;color:#222;border-radius:12px;padding:18px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;font-family:system-ui,sans-serif';
+  var loc = summarizeAudit(S.adminData, S.terrain);
+  var btn = 'flex:1;min-width:130px;padding:11px;border:none;border-radius:8px;color:#fff;font-weight:600;font-size:13px;cursor:pointer;';
+  var h = '<div style="font-size:16px;font-weight:700;margin-bottom:10px">🔧 Synchronisation</div>';
+  h += '<div style="background:#f5f5f5;border-radius:8px;padding:10px;font-size:12px;line-height:1.7;margin-bottom:10px">';
+  h += '<b>Compte :</b> ' + (_fbUser ? esc(_fbUser.email) : '❌ non connecté') + '<br>';
+  h += '<b>Cet appareil :</b> ' + esc(loc.site) + ' — ' + loc.eq + ' équipements, ' + loc.ph + ' photos<br>';
+  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-3';
+  h += '</div>';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
+  h += '<button onclick="diagForcePush()" style="' + btn + 'background:#388e3c">📤 Envoyer cet appareil vers le cloud</button>';
+  h += '<button onclick="diagForcePull()" style="' + btn + 'background:#f57c00">📥 Récupérer le cloud ici</button>';
+  h += '</div>';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
+  h += '<button onclick="diagTestFirebase()" style="' + btn + 'background:#1976d2">🧪 Tester Firebase</button>';
+  h += '<button onclick="diagClearCache()" style="' + btn + 'background:#757575">🔄 Vider cache + recharger</button>';
+  h += '</div>';
+  h += '<div id="diag-result" style="background:#1a1a2e;color:#7CFC00;border-radius:8px;padding:10px;font:11px/1.6 monospace;white-space:pre-wrap;word-break:break-all;max-height:240px;overflow-y:auto"></div>';
+  card.innerHTML = h;
   modal.appendChild(card);
   document.body.appendChild(modal);
+  document.getElementById('diag-result').textContent = _syncLog.length ? _syncLog.join('\n') : '(aucun événement)';
+}
 
-  // Test écriture/lecture Firebase
-  if(_fbUser && _fbDb){
-    var testPath = 'users/' + _fbUser.uid + '/_test';
-    var testVal = { t: Date.now(), ok: true };
-    _fbDb.ref(testPath).set(testVal).then(function(){
-      card.textContent += '\n✅ Écriture Firebase OK';
-      return _fbDb.ref(testPath).once('value');
-    }).then(function(snap){
-      var v = snap.val();
-      if(v && v.ok) card.textContent += '\n✅ Lecture Firebase OK';
-      else card.textContent += '\n❌ Lecture retourne: ' + JSON.stringify(v);
-      // Nettoyer
-      _fbDb.ref(testPath).remove();
-    }).catch(function(err){
-      card.textContent += '\n❌ Test Firebase ÉCHOUÉ: ' + err.code + ' — ' + err.message;
-      card.textContent += '\n\n⚠️ VÉRIFIEZ VOS RÈGLES FIREBASE !';
-      card.textContent += '\nAllez dans Firebase Console > Realtime Database > Rules';
-      card.textContent += '\nEt mettez ces règles :';
-      card.textContent += '\n{\n  "rules": {\n    "users": {\n      "$uid": {\n        ".read": "$uid === auth.uid",\n        ".write": "$uid === auth.uid"\n      }\n    }\n  }\n}';
-    });
-  } else {
-    card.textContent += '\n⚠️ Non connecté — impossible de tester';
+function diagLog(msg){
+  syncLog(msg);
+  var el = document.getElementById('diag-result');
+  if(el){ el.textContent += '\n' + new Date().toLocaleTimeString() + ' — ' + msg; el.scrollTop = el.scrollHeight; }
+}
+
+function diagTestFirebase(){
+  if(!_fbUser || !_fbDb){ diagLog('❌ Non connecté'); return; }
+  var testPath = 'users/' + _fbUser.uid + '/_test';
+  diagLog('🧪 Test écriture/lecture...');
+  _fbDb.ref(testPath).set({t:Date.now(),ok:true}).then(function(){
+    return _fbDb.ref(testPath).once('value');
+  }).then(function(snap){
+    var v = snap.val();
+    diagLog(v && v.ok ? '✅ Firebase OK (écriture + lecture)' : '❌ Lecture inattendue: ' + JSON.stringify(v));
+    _fbDb.ref(testPath).remove();
+  }).catch(function(err){
+    diagLog('❌ ' + err.code + ' — ' + err.message);
+    diagLog('⚠️ Règles Firebase à corriger (Realtime Database > Rules)');
+  });
+}
+
+function diagForcePush(){
+  if(!_fbUser || !_fbDb){ diagLog('❌ Non connecté'); return; }
+  var loc = summarizeAudit(S.adminData, S.terrain);
+  if(!confirm('Envoyer « ' + loc.site + ' » (' + loc.eq + ' équipements, ' + loc.ph + ' photos) vers le cloud ?\n\nCela remplace la version cloud actuelle.')) return;
+  _fbSyncPaused = false;
+  diagLog('📤 Envoi forcé...');
+  pushToCloud();
+}
+
+function diagForcePull(){
+  if(!_fbUser || !_fbDb){ diagLog('❌ Non connecté'); return; }
+  diagLog('📥 Lecture du cloud...');
+  _fbDb.ref(getCloudPath()).once('value').then(function(snap){
+    var data = snap.val();
+    if(!data || !data.v){ diagLog('❌ Aucune donnée dans le cloud'); return; }
+    var c = summarizeAudit(data.ad, data.tr);
+    diagLog('☁️ Cloud : ' + c.site + ' — ' + c.eq + ' équip., ' + c.ph + ' photos (' + (data._device||'?') + ', ' + (data._lastSync ? new Date(data._lastSync).toLocaleString() : '?') + ')');
+    if(!confirm('Remplacer les données de cet appareil par la version cloud ?\n\n☁️ ' + c.site + ' — ' + c.eq + ' équipements, ' + c.ph + ' photos')) return;
+    importCloudData(data);
+    diagLog('✅ Import terminé');
+  }).catch(function(err){
+    diagLog('❌ ' + err.code + ' — ' + err.message);
+  });
+}
+
+function diagClearCache(){
+  if(!confirm('Vider le cache de l\'application et recharger ?\n(Vos données d\'audit ne sont pas effacées.)')) return;
+  var jobs = [];
+  if('serviceWorker' in navigator){
+    jobs.push(navigator.serviceWorker.getRegistrations().then(function(regs){
+      return Promise.all(regs.map(function(r){ return r.unregister(); }));
+    }));
   }
+  if('caches' in window){
+    jobs.push(caches.keys().then(function(names){
+      return Promise.all(names.map(function(n){ return caches.delete(n); }));
+    }));
+  }
+  Promise.all(jobs).finally(function(){ window.location.reload(); });
 }
 
 </script>
