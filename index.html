@@ -5992,7 +5992,8 @@ function updateCloudUI(){
     if(mUser){ mUser.textContent = '☁️ ' + short; }
     if(mBar){
       mBar.innerHTML = '<span class="cloud-dot online" id="mob-cloud-dot"></span>' +
-        '<span style="flex:1">☁️ ' + esc(short) + '</span>' +
+        '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">☁️ ' + esc(short) + '</span>' +
+        '<span style="background:var(--accent);color:#fff;font-weight:600;cursor:pointer;padding:6px 10px;border-radius:6px;margin-right:10px" onclick="closeMobDrawer();showSyncDiag()">🔧 Synchro</span>' +
         '<span style="color:var(--danger);font-weight:500;cursor:pointer" onclick="closeMobDrawer();firebaseLogout()">Déconnexion</span>';
     }
   } else {
@@ -6422,7 +6423,7 @@ function showSyncDiag(){
   h += '<div style="background:#f5f5f5;border-radius:8px;padding:10px;font-size:12px;line-height:1.7;margin-bottom:10px">';
   h += '<b>Compte :</b> ' + (_fbUser ? esc(_fbUser.email) : '❌ non connecté') + '<br>';
   h += '<b>Cet appareil :</b> ' + esc(loc.site) + ' — ' + loc.eq + ' équipements, ' + loc.ph + ' photos<br>';
-  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-3';
+  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-4';
   h += '</div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   h += '<button onclick="diagForcePush()" style="' + btn + 'background:#388e3c">📤 Envoyer cet appareil vers le cloud</button>';

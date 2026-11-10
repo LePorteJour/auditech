@@ -1,4 +1,4 @@
-const CACHE_NAME = 'audittech-v2.4';
+const CACHE_NAME = 'audittech-v2.5';
 
 const APP_SHELL = [
   './',
