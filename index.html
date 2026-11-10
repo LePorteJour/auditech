@@ -3915,14 +3915,16 @@ function buildTransferPayload(includePhotos){
   }
   Object.entries(S.terrain).forEach(function(entry){
     var did = entry[0], domain = entry[1];
-    payload.tr[did] = { loc: domain.loc, eq: {} };
+    if(!domain) return;
+    payload.tr[did] = { loc: domain.loc || '', eq: {} };
     Object.entries(domain.equips || {}).forEach(function(eEntry){
       var eid = eEntry[0], eq = eEntry[1];
       if(!eq) return;
-      var eqData = { e: eq.etat, c: eq.crit, o: eq.obs || '' };
+      // IMPORTANT: Firebase refuse les valeurs undefined — tout doit être string
+      var eqData = { e: eq.etat || '', c: eq.crit || '', o: eq.obs || '' };
       // Inclure les photos si demandé
-      if(includePhotos && eq.photos && eq.photos.some(function(p){ return p !== null; })){
-        eqData.ph = eq.photos.filter(function(p){ return p !== null; });
+      if(includePhotos && eq.photos && eq.photos.some(function(p){ return p !== null && p !== undefined; })){
+        eqData.ph = eq.photos.filter(function(p){ return p !== null && p !== undefined; });
       }
       payload.tr[did].eq[eid] = eqData;
     });
@@ -6129,7 +6131,9 @@ function pushToCloud(){
   if(!path) return;
   syncLog('📤 Push en cours vers ' + path + '...');
   try{
-    buildCloudPayload().then(function(payload){
+    buildCloudPayload().then(function(rawPayload){
+      // Nettoyer les undefined récursivement (Firebase les refuse)
+      var payload = JSON.parse(JSON.stringify(rawPayload));
       payload._lastSync = Date.now();
       payload._device = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
       payload._sessionId = _fbSessionId;
