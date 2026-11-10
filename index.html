@@ -820,7 +820,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
     </div>
     <div class="cloud-bar" id="cloud-bar">
       <span class="cloud-dot disconnected" id="cloud-dot"></span>
-      <span class="cloud-user" id="cloud-user">Cloud : non connecté</span>
+      <span class="cloud-user" id="cloud-user" onclick="showSyncDiag()" style="cursor:pointer" title="Cliquer pour diagnostic sync">Cloud : non connecté</span>
       <span class="cloud-action" id="cloud-action" onclick="openFirebaseAuth()">Connexion</span>
     </div>
   </div>
@@ -5941,16 +5941,28 @@ function loadFirebaseSDK(){
 
 function initFirebase(){
   if(_fbApp) return;
-  _fbApp = firebase.initializeApp(FIREBASE_CONFIG);
-  _fbAuth = firebase.auth();
-  _fbDb = firebase.database();
+  syncLog('🔧 Initialisation Firebase...');
+  try{
+    _fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+    _fbAuth = firebase.auth();
+    _fbDb = firebase.database();
+    syncLog('✅ Firebase initialisé');
+  }catch(e){
+    syncLog('❌ Firebase init error: ' + e.message);
+    return;
+  }
   // Écouter les changements d'état de connexion
   _fbAuth.onAuthStateChanged(function(user){
     _fbUser = user;
     updateCloudUI();
     if(user){
+      syncLog('👤 Connecté: ' + user.email + ' (uid=' + user.uid.slice(0,8) + '...)');
+      syncLog('🆔 Session: ' + _fbSessionId);
       listenForCloudChanges();
-      pushToCloud();
+      // Premier push légèrement différé pour laisser le listener s'attacher
+      setTimeout(function(){ pushToCloud(); }, 1000);
+    } else {
+      syncLog('👤 Non connecté');
     }
   });
 }
@@ -6100,10 +6112,22 @@ function getCloudPath(){
   return 'users/' + _fbUser.uid + '/audit';
 }
 
+var _syncLog = [];
+function syncLog(msg){
+  var t = new Date().toLocaleTimeString();
+  _syncLog.push(t + ' — ' + msg);
+  if(_syncLog.length > 30) _syncLog.shift();
+  console.log('[SYNC] ' + msg);
+}
+
 function pushToCloud(){
-  if(!_fbUser || !_fbDb || _fbSyncPaused) return;
+  if(!_fbUser || !_fbDb || _fbSyncPaused){
+    syncLog('⏭️ Push ignoré: user=' + !!_fbUser + ' db=' + !!_fbDb + ' paused=' + _fbSyncPaused);
+    return;
+  }
   var path = getCloudPath();
   if(!path) return;
+  syncLog('📤 Push en cours vers ' + path + '...');
   try{
     buildCloudPayload().then(function(payload){
       payload._lastSync = Date.now();
@@ -6112,53 +6136,80 @@ function pushToCloud(){
       payload._auditId = _currentAuditId || '';
       // Vérifier la taille (limite Firebase ~10MB)
       var json = JSON.stringify(payload);
+      syncLog('📤 Payload: ' + (json.length/1024).toFixed(0) + ' KB');
       if(json.length > 9500000){
         // Trop gros : envoyer sans les photos
-        console.warn('Payload trop gros (' + (json.length/1024/1024).toFixed(1) + 'MB), envoi sans photos');
+        syncLog('⚠️ Payload trop gros, envoi sans photos');
         var lite = buildTransferPayload(false);
         lite._lastSync = payload._lastSync;
         lite._device = payload._device;
         lite._sessionId = _fbSessionId;
         lite._auditId = payload._auditId;
         lite._noPhotos = true;
-        _fbDb.ref(path).set(lite).catch(function(err){
-          console.warn('Cloud push error:', err);
+        _fbDb.ref(path).set(lite).then(function(){
+          syncLog('✅ Push SANS photos OK');
+        }).catch(function(err){
+          syncLog('❌ Push error: ' + err.code + ' — ' + err.message);
         });
         return;
       }
-      _fbDb.ref(path).set(payload).catch(function(err){
-        console.warn('Cloud push error:', err);
+      _fbDb.ref(path).set(payload).then(function(){
+        syncLog('✅ Push OK (' + (json.length/1024).toFixed(0) + ' KB)');
+      }).catch(function(err){
+        syncLog('❌ Push error: ' + err.code + ' — ' + err.message);
       });
     }).catch(function(e){
-      console.warn('pushToCloud async error:', e);
+      syncLog('❌ pushToCloud async error: ' + e.message);
     });
   }catch(e){
-    console.warn('pushToCloud error:', e);
+    syncLog('❌ pushToCloud error: ' + e.message);
   }
 }
 
 var _fbListener = null;
 function listenForCloudChanges(){
-  if(!_fbUser || !_fbDb) return;
+  if(!_fbUser || !_fbDb){
+    syncLog('⏭️ Listener non attaché: user=' + !!_fbUser + ' db=' + !!_fbDb);
+    return;
+  }
   // Détacher l'ancien listener
   if(_fbListener){
     _fbDb.ref(_fbListener).off();
+    syncLog('🔄 Ancien listener détaché');
   }
   var path = getCloudPath();
   _fbListener = path;
+  syncLog('👂 Listener attaché sur ' + path);
   _fbDb.ref(path).on('value', function(snapshot){
-    if(_fbSyncPaused) return;
+    syncLog('📥 Données reçues du cloud');
+    if(_fbSyncPaused){
+      syncLog('⏭️ Import ignoré (sync en pause)');
+      return;
+    }
     var data = snapshot.val();
-    if(!data || !data.v) return;
+    if(!data){
+      syncLog('ℹ️ Aucune donnée dans le cloud (null)');
+      return;
+    }
+    if(!data.v){
+      syncLog('ℹ️ Données cloud sans version (v manquant). Clés: ' + Object.keys(data).join(','));
+      return;
+    }
     // Ne pas écraser si c'est notre propre push (même session)
-    if(data._sessionId === _fbSessionId) return;
-    // Importer les données cloud
+    if(data._sessionId === _fbSessionId){
+      syncLog('⏭️ C\'est notre propre push (session ' + _fbSessionId.slice(0,6) + ')');
+      return;
+    }
+    syncLog('📥 Import depuis session ' + (data._sessionId||'?').slice(0,6) + ' device=' + (data._device||'?'));
     importCloudData(data);
+  }, function(err){
+    syncLog('❌ Listener error: ' + err.code + ' — ' + err.message);
   });
 }
 
 function importCloudData(data){
   _fbSyncPaused = true;
+  syncLog('📥 Import des données cloud...');
   try{
     // Réutiliser la logique d'import du transfer code
     if(data.ad) S.adminData = data.ad;
@@ -6179,14 +6230,14 @@ function importCloudData(data){
       Object.entries(data.tr).forEach(function(entry){
         var dId = entry[0], dData = entry[1];
         if(!S.terrain[dId]) S.terrain[dId] = {loc:'', equips:{}};
-        if(dData.loc) S.terrain[dId].loc = dData.loc;
+        if(dData.loc !== undefined) S.terrain[dId].loc = dData.loc;
         if(dData.eq){
           Object.entries(dData.eq).forEach(function(eEntry){
             var eId = eEntry[0], eq = eEntry[1];
             if(!S.terrain[dId].equips[eId]) S.terrain[dId].equips[eId] = {etat:'', crit:'', obs:'', photos:[]};
             S.terrain[dId].equips[eId].etat = eq.e || '';
             S.terrain[dId].equips[eId].crit = eq.c || '';
-            if(eq.o) S.terrain[dId].equips[eId].obs = eq.o;
+            if(eq.o !== undefined) S.terrain[dId].equips[eId].obs = eq.o;
             // Restaurer les photos depuis le cloud
             if(eq.ph && eq.ph.length){
               S.terrain[dId].equips[eId].photos = eq.ph.slice();
@@ -6195,38 +6246,141 @@ function importCloudData(data){
         }
       });
     }
-    // Sauvegarder localement
-    saveState();
-    // Rafraîchir l'affichage
+    // Sauvegarder localement SANS re-pousser vers le cloud
+    saveStateLocal();
     // Rafraîchir la page visible
     try{ goToPage(_currentPage); }catch(e){}
     updateProgress();
+    syncLog('✅ Import terminé');
     showToastMsg('☁️ Données synchronisées');
   }catch(e){
-    console.warn('importCloudData error:', e);
+    syncLog('❌ Import error: ' + e.message);
   }
-  setTimeout(function(){ _fbSyncPaused = false; }, 4000);
+  setTimeout(function(){ _fbSyncPaused = false; syncLog('🔓 Sync débloquée'); }, 4000);
+}
+
+// Sauvegarde locale UNIQUEMENT (sans déclencher un push cloud)
+function saveStateLocal(){
+  try{
+    var slim = JSON.parse(JSON.stringify(S));
+    Object.values(slim.terrain||{}).forEach(function(domain){
+      Object.values(domain.equips||{}).forEach(function(eq){
+        if(eq) delete eq.photos;
+      });
+    });
+    slim.coverPhoto = null;
+    localStorage.setItem('audittech_v1', JSON.stringify(slim));
+  }catch(e){ console.error('saveStateLocal error:', e); }
+  // Photos
+  Object.entries(S.terrain||{}).forEach(function(entry){
+    var dId = entry[0], domain = entry[1];
+    try{
+      var photosMap = {};
+      var hasPhotos = false;
+      Object.entries(domain.equips||{}).forEach(function(eEntry){
+        var eIdx = eEntry[0], eq = eEntry[1];
+        if(eq && eq.photos && eq.photos.some(function(p){ return p; })){
+          photosMap[eIdx] = eq.photos;
+          hasPhotos = true;
+        }
+      });
+      if(hasPhotos){
+        localStorage.setItem('audittech_photos_'+dId, JSON.stringify(photosMap));
+      } else {
+        localStorage.removeItem('audittech_photos_'+dId);
+      }
+    }catch(e){}
+  });
+  if(S.coverPhoto){
+    try{ localStorage.setItem('audittech_cover_photo', S.coverPhoto); }catch(e){}
+  } else {
+    localStorage.removeItem('audittech_cover_photo');
+  }
 }
 
 // Debounced cloud push — appelé après chaque saveState
 var _cloudPushTimer = null;
 function scheduleCloudPush(){
-  if(!_fbUser || _fbSyncPaused) return;
+  if(!_fbUser || _fbSyncPaused){
+    return;
+  }
   clearTimeout(_cloudPushTimer);
+  syncLog('⏱️ Push programmé dans 2.5s');
   _cloudPushTimer = setTimeout(function(){
     if(!_fbSyncPaused) pushToCloud();
+    else syncLog('⏭️ Push annulé (sync en pause)');
   }, 2500);
 }
 
 // Auto-init : tenter la reconnexion si déjà authentifié
 window.addEventListener('load', function(){
-  // Charger Firebase en arrière-plan pour auto-reconnexion
+  syncLog('🚀 App chargée, init Firebase dans 1.5s...');
   setTimeout(function(){
     loadFirebaseSDK().then(function(){
+      syncLog('✅ SDK Firebase chargé');
       initFirebase();
-    }).catch(function(){});
+    }).catch(function(e){
+      syncLog('❌ Erreur chargement SDK: ' + e.message);
+    });
   }, 1500);
 });
+
+// === PANNEAU DIAGNOSTIC SYNC ===
+function showSyncDiag(){
+  var lines = ['=== DIAGNOSTIC SYNC ==='];
+  lines.push('Session ID: ' + _fbSessionId);
+  lines.push('Firebase SDK chargé: ' + _fbLoaded);
+  lines.push('Firebase App: ' + !!_fbApp);
+  lines.push('Firebase Auth: ' + !!_fbAuth);
+  lines.push('Firebase DB: ' + !!_fbDb);
+  lines.push('User connecté: ' + !!_fbUser);
+  if(_fbUser) lines.push('Email: ' + _fbUser.email);
+  if(_fbUser) lines.push('UID: ' + _fbUser.uid);
+  lines.push('Listener actif: ' + !!_fbListener);
+  if(_fbListener) lines.push('Listener path: ' + _fbListener);
+  lines.push('Sync en pause: ' + _fbSyncPaused);
+  lines.push('');
+  lines.push('=== LOG RÉCENT ===');
+  _syncLog.forEach(function(l){ lines.push(l); });
+  if(_syncLog.length === 0) lines.push('(aucun événement)');
+
+  // Test de connectivité Firebase
+  lines.push('');
+  lines.push('=== TEST EN COURS ===');
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.onclick = function(e){ if(e.target===modal) document.body.removeChild(modal); };
+  var card = document.createElement('div');
+  card.style.cssText = 'background:#fff;border-radius:12px;padding:20px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;font:13px/1.6 monospace;white-space:pre-wrap;word-break:break-all';
+  card.textContent = lines.join('\n');
+  modal.appendChild(card);
+  document.body.appendChild(modal);
+
+  // Test écriture/lecture Firebase
+  if(_fbUser && _fbDb){
+    var testPath = 'users/' + _fbUser.uid + '/_test';
+    var testVal = { t: Date.now(), ok: true };
+    _fbDb.ref(testPath).set(testVal).then(function(){
+      card.textContent += '\n✅ Écriture Firebase OK';
+      return _fbDb.ref(testPath).once('value');
+    }).then(function(snap){
+      var v = snap.val();
+      if(v && v.ok) card.textContent += '\n✅ Lecture Firebase OK';
+      else card.textContent += '\n❌ Lecture retourne: ' + JSON.stringify(v);
+      // Nettoyer
+      _fbDb.ref(testPath).remove();
+    }).catch(function(err){
+      card.textContent += '\n❌ Test Firebase ÉCHOUÉ: ' + err.code + ' — ' + err.message;
+      card.textContent += '\n\n⚠️ VÉRIFIEZ VOS RÈGLES FIREBASE !';
+      card.textContent += '\nAllez dans Firebase Console > Realtime Database > Rules';
+      card.textContent += '\nEt mettez ces règles :';
+      card.textContent += '\n{\n  "rules": {\n    "users": {\n      "$uid": {\n        ".read": "$uid === auth.uid",\n        ".write": "$uid === auth.uid"\n      }\n    }\n  }\n}';
+    });
+  } else {
+    card.textContent += '\n⚠️ Non connecté — impossible de tester';
+  }
+}
 
 </script>
 
