@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.firebaseio.com https://*.firebasedatabase.app https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.gstatic.com https://*.firebaseio.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.firebaseio.com https://*.firebasedatabase.app https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com wss://*.firebasedatabase.app">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#F5813A">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -6127,6 +6127,8 @@ function syncLog(msg){
   _syncLog.push(t + ' — ' + msg);
   if(_syncLog.length > 30) _syncLog.shift();
   console.log('[SYNC] ' + msg);
+  var el = document.getElementById('diag-result');
+  if(el){ el.textContent += '\n' + t + ' — ' + msg; el.scrollTop = el.scrollHeight; }
 }
 
 function pushToCloud(){
@@ -6201,7 +6203,15 @@ function initialCloudSync(){
   if(!path) return;
   _fbSyncPaused = true;
   syncLog('🔍 Lecture initiale du cloud...');
+  var _answered = false;
+  setTimeout(function(){
+    if(!_answered){
+      syncLog('⚠️ Serveur Firebase injoignable (pas de réponse après 15 s). Vérifiez la connexion internet.');
+      _fbSyncPaused = false;
+    }
+  }, 15000);
   _fbDb.ref(path).once('value').then(function(snap){
+    _answered = true;
     var cloud = snap.val();
     var local = summarizeAudit(S.adminData, S.terrain);
     var localMod = getLocalLastMod();
@@ -6423,7 +6433,7 @@ function showSyncDiag(){
   h += '<div style="background:#f5f5f5;border-radius:8px;padding:10px;font-size:12px;line-height:1.7;margin-bottom:10px">';
   h += '<b>Compte :</b> ' + (_fbUser ? esc(_fbUser.email) : '❌ non connecté') + '<br>';
   h += '<b>Cet appareil :</b> ' + esc(loc.site) + ' — ' + loc.eq + ' équipements, ' + loc.ph + ' photos<br>';
-  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-4';
+  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-5';
   h += '</div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   h += '<button onclick="diagForcePush()" style="' + btn + 'background:#388e3c">📤 Envoyer cet appareil vers le cloud</button>';
@@ -6440,11 +6450,7 @@ function showSyncDiag(){
   document.getElementById('diag-result').textContent = _syncLog.length ? _syncLog.join('\n') : '(aucun événement)';
 }
 
-function diagLog(msg){
-  syncLog(msg);
-  var el = document.getElementById('diag-result');
-  if(el){ el.textContent += '\n' + new Date().toLocaleTimeString() + ' — ' + msg; el.scrollTop = el.scrollHeight; }
-}
+function diagLog(msg){ syncLog(msg); }
 
 function diagTestFirebase(){
   if(!_fbUser || !_fbDb){ diagLog('❌ Non connecté'); return; }
