@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://*.firebaseio.com https://*.firebasedatabase.app https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#F5813A">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -108,18 +108,18 @@ html,body{height:100%;font-family:'DM Sans',system-ui,sans-serif;background:var(
 .main-body{padding:32px 36px;flex:1;max-width:900px}
 
 /* ======================== MOBILE ======================== */
-.mobile-header{display:none;background:var(--accent);padding:14px 16px 0;position:sticky;top:0;z-index:100}
-.mobile-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.mobile-logo{font-size:16px;font-weight:600;color:#fff;letter-spacing:-0.3px}
+.mobile-header{display:none;background:var(--accent);padding:12px 14px 0;position:sticky;top:0;z-index:100}
+.mobile-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.mobile-logo{font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.3px;flex-shrink:0}
 .mobile-logo span{opacity:0.5;font-weight:300}
-.mobile-auditor{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:5px 12px;color:#fff;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:140px}
+.mobile-auditor{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:7px 14px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;flex:1;min-width:0}
 .mobile-auditor::placeholder{color:rgba(255,255,255,0.4)}
-.mobile-progress{height:3px;background:rgba(255,255,255,0.15);overflow:hidden;margin:0 -16px}
+.mobile-progress{height:3px;background:rgba(255,255,255,0.15);overflow:hidden;margin:0 -14px}
 .mobile-progress-fill{height:100%;background:#fff;transition:width 0.5s ease}
 .mobile-tabs{display:flex;overflow-x:auto;gap:0;padding:0;scrollbar-width:none}
 .mobile-tabs::-webkit-scrollbar{display:none}
-.mobile-tab{flex-shrink:0;padding:10px 14px;color:rgba(255,255,255,0.55);font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap}
-.mobile-tab.active{color:#fff;border-bottom-color:#fff}
+.mobile-tab{flex:1;padding:12px 10px;color:rgba(255,255,255,0.55);font-size:13px;font-weight:500;cursor:pointer;border-bottom:2.5px solid transparent;transition:all 0.2s;white-space:nowrap;text-align:center;min-height:44px}
+.mobile-tab.active{color:#fff;border-bottom-color:#fff;font-weight:600}
 
 
 .listing-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;line-height:1.5}
@@ -128,7 +128,9 @@ html,body{height:100%;font-family:'DM Sans',system-ui,sans-serif;background:var(
 .listing-table tr:last-child td{border-bottom:none}
 .listing-table tr:hover td{background:var(--accent-light)}
 .listing-table input,.listing-table select{border:1px solid var(--border);border-radius:var(--rad-xs);padding:6px 8px;font-size:12px;font-family:'DM Sans',sans-serif;width:100%;background:var(--surface)}
-.listing-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -18px;padding:0 18px}
+.listing-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -18px;padding:0 18px;position:relative}
+.listing-wrap::after{content:'';position:sticky;right:0;top:0;bottom:0;width:24px;background:linear-gradient(to left,var(--surface),transparent);pointer-events:none;display:none}
+@media(max-width:768px){.listing-wrap::after{display:block}}
 .btn-add-row{display:flex;align-items:center;gap:6px;padding:10px 16px;border:1.5px dashed var(--border2);border-radius:var(--rad-sm);background:none;color:var(--text2);font-size:12px;cursor:pointer;width:100%;justify-content:center;transition:all 0.15s;font-family:'DM Sans',sans-serif;margin-top:12px}
 .btn-add-row:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
 .btn-upload-xls{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--rad-sm);background:var(--surface2);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
@@ -143,9 +145,88 @@ html,body{height:100%;font-family:'DM Sans',system-ui,sans-serif;background:var(
   .mobile-header{display:block}
   .main{overflow-y:visible}
   .main-header{display:none}
-  .main-body{padding:16px}
+  .main-body{padding:14px 12px 80px}
   .shell{flex-direction:column;height:auto;overflow:visible}
   .desktop-only{display:none!important}
+  /* — Touch targets min 44px — */
+  .chip{padding:10px 16px;font-size:13px;min-height:44px;display:inline-flex;align-items:center}
+  .rate-btn{padding:12px 6px;font-size:13px;min-height:44px}
+  .btn-nav{padding:14px 18px;font-size:14px;min-height:48px;border-radius:var(--rad);font-weight:600}
+  .btn-nav.primary{font-size:14px}
+  .page-nav{margin-top:20px;padding-top:14px;gap:8px}
+  /* — Fields more spacious — */
+  .field{padding:14px 16px;gap:8px}
+  label,.field-lbl{font-size:13px}
+  input[type=text],input[type=date],input[type=number],select,textarea{font-size:16px;padding:12px 14px;border-radius:var(--rad-sm)}
+  textarea{min-height:80px}
+  /* — Equipment cards — */
+  .equip-wrap{margin-bottom:16px;border-radius:var(--rad)}
+  .equip-head{padding:14px 16px;font-size:14px}
+  .equip-body{padding:14px 16px;gap:14px}
+  .rating-title{font-size:12px;margin-bottom:6px}
+  .equip-rating-row{flex-direction:column;gap:12px}
+  /* — Photo zones — */
+  .photo-zone{padding:14px 16px;min-height:52px;border-radius:var(--rad-sm)}
+  .photo-zone-icon{font-size:22px}
+  .photo-zone-text{font-size:13px}
+  .photo-thumb{width:72px;height:72px;border-radius:var(--rad-sm)}
+  .photo-rm{width:22px;height:22px;font-size:11px;top:3px;right:3px}
+  /* — Cards — */
+  .card{border-radius:var(--rad);margin-bottom:16px}
+  .card-head{padding:12px 16px;font-size:12px}
+  /* — Domain grid — */
+  .domain-grid{grid-template-columns:1fr;gap:10px}
+  .domain-card{padding:16px;border-radius:var(--rad);min-height:64px}
+  .domain-num{width:44px;height:44px;border-radius:12px;font-size:20px}
+  .domain-name{font-size:15px}
+  .domain-meta{font-size:12px;margin-top:4px}
+  .domain-arrow{font-size:22px}
+  /* — Stats synthèse — */
+  .stat-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-card{padding:16px;border-radius:var(--rad)}
+  .stat-num{font-size:28px}
+  .stat-lbl{font-size:12px;margin-top:6px}
+  /* — Group labels — */
+  .group-label{font-size:12px;margin:24px 0 10px}
+  .group-label:first-child{margin-top:0}
+  /* — Location tag — */
+  .loc-tag{padding:8px 14px;font-size:13px;min-height:40px}
+  /* — Modal — */
+  .modal{padding:20px;border-radius:16px}
+  .modal-title{font-size:17px}
+  .modal-chip{padding:14px;font-size:14px;min-height:48px}
+  .btn-confirm,.btn-cancel{padding:14px;font-size:14px;min-height:48px;border-radius:var(--rad-sm)}
+  /* — Tables — */
+  .listing-table{font-size:13px}
+  .listing-table th{padding:10px;font-size:11px}
+  .listing-table td{padding:10px}
+  .listing-table input,.listing-table select{font-size:14px;padding:8px 10px}
+  .btn-add-row{padding:14px;font-size:13px;min-height:48px;border-radius:var(--rad-sm)}
+  /* — Back bar — */
+  .btn-back{padding:10px 14px;font-size:13px;min-height:44px}
+  .btn-save{padding:10px 16px;font-size:13px;min-height:44px}
+  /* — Toast — */
+  .toast{font-size:14px;padding:12px 24px;border-radius:24px;bottom:28px}
+  /* — Alert / action items — */
+  .alert-strip{font-size:13px;padding:12px 14px;border-radius:var(--rad-sm)}
+  .hse-note-badge{width:52px;height:52px;font-size:24px;border-radius:12px}
+  .hse-note-label{font-size:15px}
+  .hse-note-sub{font-size:13px}
+  .action-item{padding:12px 16px;gap:10px}
+  .action-badge{font-size:12px;padding:4px 10px}
+  .action-text{font-size:14px}
+  .action-loc{font-size:12px}
+  /* — Import modal — */
+  .import-card{padding:20px;border-radius:16px}
+  .import-zone{padding:24px 16px}
+  .import-zone-text{font-size:14px}
+  .import-tab{padding:12px;font-size:13px;min-height:44px}
+  .btn-cancel-import{padding:14px;font-size:14px;min-height:48px}
+  /* — Drawer items — */
+  .mob-drawer-item{padding:16px;font-size:15px;min-height:56px;border-radius:var(--rad-sm)}
+  .mob-drawer-item .di-icon{font-size:22px;width:32px}
+  .mob-drawer-title{font-size:14px;margin-bottom:16px}
+  .mob-drawer-panel{padding:20px 16px 36px;border-radius:16px 16px 0 0}
 }
 
 /* ======================== COMPONENTS ======================== */
@@ -298,7 +379,17 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 }
 @media(max-width:480px){
   .domain-grid{grid-template-columns:1fr}
-  .rate-btn{font-size:11px;padding:7px 2px}
+  /* — Stack field-inline vertically on very small screens — */
+  .field-inline{flex-direction:column;align-items:stretch;gap:6px}
+  .field-inline label{white-space:normal}
+  .field-inline input,.field-inline select{width:100%!important;max-width:none!important;min-width:0!important}
+  /* — Full-width page nav buttons — */
+  .page-nav{flex-direction:column}
+  .page-nav .btn-nav{width:100%;justify-content:center}
+  .nav-spacer{display:none}
+  /* — Stat grid single col on tiny screens — */
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .stat-num{font-size:24px}
 }
 
 /* Import / Export / Sync */
@@ -316,8 +407,8 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 .sync-icon{font-size:14px;flex-shrink:0}
 
 /* Drawer sync mobile */
-.mob-sync-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:18px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;font-family:'DM Sans',sans-serif}
-.mob-sync-btn:active{background:rgba(255,255,255,0.25)}
+.mob-sync-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;font-size:18px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;font-family:'DM Sans',sans-serif;transition:background 0.15s}
+.mob-sync-btn:active{background:rgba(255,255,255,0.3);transform:scale(0.93)}
 .mob-drawer{position:fixed;inset:0;z-index:450;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none;opacity:0;transition:opacity 0.2s}
 .mob-drawer.open{pointer-events:all;opacity:1}
 .mob-drawer-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.45)}
@@ -331,6 +422,32 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 .mob-drawer-item.green{border-color:#9FE1CB;background:#E0F5EC;color:#1A5C45}
 .mob-drawer-item.blue{border-color:#A8C8E8;background:#E3EFF8;color:#0F3D5C}
 .mob-drawer-item.amber{border-color:#FAC775;background:#FDF0DC;color:#7A4D0A}
+
+/* Transfer modal */
+.transfer-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px}
+.transfer-card{background:var(--surface);border-radius:var(--rad);padding:24px;width:100%;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto}
+.transfer-tabs{display:flex;gap:8px;margin-bottom:16px}
+.transfer-tab{flex:1;padding:10px 8px;border:1.5px solid var(--border);border-radius:var(--rad-sm);font-size:13px;font-weight:500;cursor:pointer;text-align:center;transition:all 0.15s;background:var(--surface2);font-family:'DM Sans',sans-serif;color:var(--text2)}
+.transfer-tab.active{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.transfer-code-box{width:100%;min-height:80px;max-height:140px;padding:12px;border:1.5px solid var(--border);border-radius:var(--rad-sm);font-family:monospace;font-size:11px;word-break:break-all;overflow-y:auto;background:var(--surface2);color:var(--text);resize:none;line-height:1.4}
+.transfer-code-box:focus{border-color:var(--accent);outline:none}
+.transfer-send-methods{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.btn-send-method{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--rad-sm);background:var(--surface2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;width:100%;text-align:left;min-height:48px}
+.btn-send-method:hover{border-color:var(--accent);background:var(--accent-light)}
+.btn-send-method:active{transform:scale(0.98)}
+.btn-send-method .sm-icon{font-size:22px;flex-shrink:0;width:28px;text-align:center}
+.btn-send-method .sm-text{font-size:14px;font-weight:500;color:var(--text)}
+.btn-send-method .sm-hint{font-size:11px;color:var(--text3);margin-top:2px}
+.btn-send-method.highlight{border-color:var(--accent);background:var(--accent-light)}
+.transfer-actions{display:flex;gap:8px;margin-top:14px}
+.btn-transfer{flex:1;padding:12px;border:none;border-radius:var(--rad-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;min-height:44px}
+.btn-transfer.primary{background:var(--accent);color:#fff}
+.btn-transfer.primary:hover{filter:brightness(1.1)}
+.btn-transfer.primary:active{transform:scale(0.97)}
+.btn-transfer.secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.transfer-status{padding:10px 14px;border-radius:var(--rad-sm);font-size:13px;margin-top:10px;display:none;font-weight:500}
+.transfer-status.ok{background:var(--success-bg);color:var(--success);border:1px solid #9FE1CB;display:block}
+.transfer-status.err{background:var(--danger-bg);color:var(--danger);border:1px solid #F5C4B3;display:block}
 
 /* Modal import */
 .import-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -382,8 +499,88 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 .mob-substrip{display:none;background:rgba(0,0,0,0.15);overflow-x:auto;padding:0 14px;scrollbar-width:none}
 .mob-substrip::-webkit-scrollbar{display:none}
 .mob-substrip.show{display:flex;gap:0}
-.mob-sub-btn{flex-shrink:0;padding:7px 10px;color:rgba(255,255,255,0.55);font-size:10px;font-weight:500;cursor:pointer;border:none;border-bottom:2px solid transparent;white-space:nowrap;background:none;font-family:'DM Sans',sans-serif}
-.mob-sub-btn.active{color:#fff;border-bottom-color:#fff}
+.mob-sub-btn{flex-shrink:0;padding:10px 14px;color:rgba(255,255,255,0.6);font-size:12px;font-weight:500;cursor:pointer;border:none;border-bottom:2.5px solid transparent;white-space:nowrap;background:none;font-family:'DM Sans',sans-serif;min-height:40px}
+.mob-sub-btn.active{color:#fff;border-bottom-color:#fff;font-weight:600}
+
+/* ======================== MOBILE POLISH ======================== */
+/* Active/pressed states for tactile feedback */
+@media(max-width:768px){
+  .rate-btn:active{transform:scale(0.95);transition:transform 0.05s}
+  .chip:active{transform:scale(0.95);transition:transform 0.05s}
+  .domain-card:active{transform:scale(0.98);transition:transform 0.05s}
+  .btn-nav:active{transform:scale(0.97);transition:transform 0.05s}
+  .mob-drawer-item:active{transform:scale(0.98);transition:transform 0.05s}
+  .photo-zone:active{transform:scale(0.97);transition:transform 0.05s}
+  .loc-tag:active{transform:scale(0.95);transition:transform 0.05s}
+  /* Smooth scroll for iOS */
+  .main,.main-body{-webkit-overflow-scrolling:touch}
+  /* Prevent zoom on input focus (iOS) — already font-size:16px */
+  /* Better select appearance on mobile */
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2352524E' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+  /* Scroll hint on tables */
+  .listing-wrap{scroll-snap-type:x proximity}
+}
+
+/* ======================== SIDEBAR TABS ======================== */
+.sync-tab,.mob-tab{flex:1;padding:8px 0;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;text-align:center}
+.sync-tab{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.55);border-bottom:2px solid transparent}
+.sync-tab:first-child{border-radius:var(--rad-sm) 0 0 var(--rad-sm)}
+.sync-tab:last-child{border-radius:0 var(--rad-sm) var(--rad-sm) 0}
+.sync-tab.active{background:rgba(255,255,255,0.18);color:#fff;border-bottom-color:rgba(255,255,255,0.6)}
+.sync-tab:hover:not(.active){background:rgba(255,255,255,0.12)}
+.mob-tab{background:var(--surface2);color:var(--text3);border:1px solid var(--border);border-bottom:2px solid transparent}
+.mob-tab:first-child{border-radius:var(--rad-sm) 0 0 var(--rad-sm);border-right:none}
+.mob-tab:last-child{border-radius:0 var(--rad-sm) var(--rad-sm) 0}
+.mob-tab.active{background:var(--accent-light);color:var(--accent);border-color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Audit History Modal */
+.history-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px}
+.history-modal.hidden{display:none}
+.history-card{background:var(--surface);border-radius:var(--rad);padding:24px;max-width:480px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.history-card h3{font-size:17px;font-weight:600;margin-bottom:4px}
+.history-card .h-sub{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5}
+.history-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.history-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--rad-sm);background:var(--surface2);cursor:pointer;transition:all 0.15s}
+.history-item:hover{background:var(--accent-light);border-color:var(--accent)}
+.history-item .hi-icon{font-size:22px;flex-shrink:0}
+.history-item .hi-info{flex:1;min-width:0}
+.history-item .hi-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-item .hi-date{font-size:11px;color:var(--text3)}
+.history-item .hi-del{width:32px;height:32px;border-radius:50%;border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--text3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+.history-item .hi-del:hover{background:var(--danger-bg);color:var(--danger)}
+.history-empty{text-align:center;padding:30px 20px;color:var(--text3);font-size:14px}
+
+/* ======================== FIREBASE CLOUD SYNC ======================== */
+.cloud-bar{display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid rgba(255,255,255,0.12);font-size:12px;color:rgba(255,255,255,0.7)}
+.cloud-bar .cloud-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cloud-dot.online{background:#4caf50;box-shadow:0 0 6px rgba(76,175,80,0.5)}
+.cloud-dot.offline{background:#ff9800}
+.cloud-dot.disconnected{background:rgba(255,255,255,0.3)}
+.cloud-bar .cloud-user{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cloud-bar .cloud-action{cursor:pointer;text-decoration:underline;color:rgba(255,255,255,0.85);font-weight:500}
+.cloud-bar .cloud-action:hover{color:#fff}
+
+/* Firebase Auth Modal */
+.fb-auth-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
+.fb-auth-modal.hidden{display:none}
+.fb-auth-card{background:var(--surface);border-radius:var(--rad);padding:28px 24px;max-width:380px;width:100%;box-shadow:var(--shadow-lg)}
+.fb-auth-card h3{font-size:17px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.fb-auth-card .fb-sub{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.5}
+.fb-auth-card label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px}
+.fb-auth-card input[type="email"],.fb-auth-card input[type="password"]{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rad-sm);font-size:14px;font-family:'DM Sans',sans-serif;margin-bottom:12px;outline:none;background:var(--surface)}
+.fb-auth-card input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,129,58,0.12)}
+.fb-auth-card .fb-btn{width:100%;padding:12px;border:none;border-radius:var(--rad-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.fb-btn-primary{background:var(--accent);color:#fff}
+.fb-btn-primary:hover{background:var(--accent2)}
+.fb-btn-secondary{background:var(--surface2);color:var(--text);margin-top:8px}
+.fb-btn-secondary:hover{background:var(--surface3)}
+.fb-auth-card .fb-switch{font-size:13px;color:var(--accent);cursor:pointer;text-align:center;margin-top:14px;font-weight:500}
+.fb-auth-card .fb-switch:hover{text-decoration:underline}
+.fb-auth-card .fb-error{background:var(--danger-bg);color:var(--danger);padding:8px 12px;border-radius:var(--rad-xs);font-size:12px;margin-bottom:12px;display:none;border:1px solid #F5C4B3}
+.fb-auth-card .fb-info{background:var(--info-bg);color:var(--info);padding:8px 12px;border-radius:var(--rad-xs);font-size:12px;margin-bottom:12px;display:none;border:1px solid #B3D4ED}
+
+/* Cloud sync status in mobile drawer */
+.mob-cloud-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:12px;color:var(--text2);border-top:1px solid var(--border)}
 
 </style>
 </head>
@@ -395,11 +592,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
   <div class="mobile-top">
     <div class="mobile-logo">Mus B. <span>| AuditTech</span></div>
     <input class="mobile-auditor" type="text" id="mob-auditor" placeholder="Votre nom…" oninput="syncAuditor(this.value)">
-    <div style="display:flex;gap:4px;align-items:center">
-      <button class="btn-pdf" style="padding:6px 8px;font-size:10px" onclick="generatePDF()">PDF</button>
-      <button class="btn-pdf" style="padding:6px 8px;font-size:10px;background:#1a6e32" onclick="generateExcel()">XLS</button>
-      <button class="mob-sync-btn" onclick="openMobDrawer()" title="Synchronisation">⋯</button>
-    </div>
+    <button class="mob-sync-btn" onclick="openMobDrawer()" title="Menu" style="font-size:20px">☰</button>
   </div>
   <div class="mobile-progress"><div class="mobile-progress-fill" id="mob-progress" style="width:0%"></div></div>
   <div class="mobile-tabs">
@@ -414,13 +607,28 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 <div class="mob-drawer" id="mob-drawer" onclick="closeMobDrawer(event)">
   <div class="mob-drawer-backdrop"></div>
   <div class="mob-drawer-panel">
-    <div class="mob-drawer-title">Synchronisation</div>
-    <div class="mob-drawer-btns">
-      <button class="mob-drawer-item green" onclick="closeMobDrawer();exportSession()"><span class="di-icon">📧</span><span>Exporter &amp; envoyer par mail</span></button>
-      <button class="mob-drawer-item blue" onclick="closeMobDrawer();openImportModal('json')"><span class="di-icon">📥</span><span>Importer une session</span></button>
+    <div style="display:flex;gap:0;margin-bottom:12px">
+      <button class="mob-tab active" id="mtab-audit" onclick="switchMobTab('audit')">☁️ Audit</button>
+      <button class="mob-tab" id="mtab-transfer" onclick="switchMobTab('transfer')">📁 Transfert</button>
+    </div>
+    <div id="mpanel-audit" class="mob-drawer-btns">
+      <button class="mob-drawer-item" onclick="closeMobDrawer();newAudit()" style="border-color:#4caf50;background:#E0F5EC;color:#1a6e32;font-weight:600"><span class="di-icon">✨</span><span>Nouvel audit vierge</span></button>
+      <button class="mob-drawer-item blue" onclick="closeMobDrawer();openAuditHistory()"><span class="di-icon">📂</span><span>Historique des audits</span></button>
+      <div style="height:1px;background:var(--border);margin:4px 0"></div>
+      <button class="mob-drawer-item" onclick="closeMobDrawer();generatePDF()" style="border-color:var(--accent);background:var(--accent-light);color:var(--accent)"><span class="di-icon">📄</span><span>Générer rapport PDF</span></button>
+      <button class="mob-drawer-item" onclick="closeMobDrawer();generateExcel()" style="border-color:#1a6e32;background:#E0F5EC;color:#1a6e32"><span class="di-icon">📊</span><span>Exporter Excel</span></button>
+    </div>
+    <div id="mpanel-transfer" class="mob-drawer-btns" style="display:none">
+      <button class="mob-drawer-item" onclick="closeMobDrawer();exportSession()"><span class="di-icon">📧</span><span>Exporter JSON &amp; mail</span></button>
+      <button class="mob-drawer-item blue" onclick="closeMobDrawer();openImportModal('json')"><span class="di-icon">📥</span><span>Importer un fichier JSON</span></button>
       <button class="mob-drawer-item" onclick="closeMobDrawer();openMergeModal()" style="border-color:rgba(76,175,80,0.3);background:rgba(76,175,80,0.08)"><span class="di-icon">🔀</span><span>Fusionner une session</span></button>
       <button class="mob-drawer-item amber" onclick="closeMobDrawer();openImportModal('excel')"><span class="di-icon">📊</span><span>Importer depuis Excel</span></button>
       <button class="mob-drawer-item" onclick="closeMobDrawer();generateTemplate()"><span class="di-icon">📋</span><span>Template Excel vierge</span></button>
+    </div>
+    <div class="mob-cloud-bar" id="mob-cloud-bar">
+      <span class="cloud-dot disconnected" id="mob-cloud-dot"></span>
+      <span id="mob-cloud-user" style="flex:1">Cloud : non connecté</span>
+      <span style="color:var(--accent);font-weight:500;cursor:pointer" onclick="closeMobDrawer();openFirebaseAuth()">Connexion</span>
     </div>
   </div>
 </div>
@@ -499,7 +707,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
       </div>
       </div>
 
-      <div class="nav-section-label" style="margin-top:8px" onclick="toggleNavSection(this)"><span>🔍 Partie terrain</span><span class="nav-sec-arrow">›</span></div>
+      <div class="nav-section-label" style="margin-top:8px" onclick="toggleNavSection(this)"><span>🛡️ HSE</span><span class="nav-sec-arrow">›</span></div>
       <div class="nav-section-group" id="nav-grp-terrain">
       <div class="nav-item" id="nav-11" onclick="goToPage(11)">
         <div class="nav-icon">🏗️</div>
@@ -561,40 +769,26 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
         <div class="nav-label">IT / Télécom</div>
         <div class="nav-check" id="chk-22">—</div>
       </div>
-      </div>
-
-      <div class="nav-section-label" style="margin-top:8px" onclick="toggleNavSection(this)"><span>🛡️ HSE Sécurité</span><span class="nav-sec-arrow">›</span></div>
-      <div class="nav-section-group" id="nav-grp-hse">
       <div class="nav-item" id="nav-23" onclick="goToPage(23)">
-        <div class="nav-icon">🔥</div>
-        <div class="nav-label">Sécurité Incendie</div>
+        <div class="nav-icon">🅿️</div>
+        <div class="nav-label">Parking</div>
         <div class="nav-check" id="chk-23">—</div>
       </div>
       <div class="nav-item" id="nav-24" onclick="goToPage(24)">
-        <div class="nav-icon">⚡</div>
-        <div class="nav-label">Courant fort</div>
+        <div class="nav-icon">🔒</div>
+        <div class="nav-label">Sécu. personnes</div>
         <div class="nav-check" id="chk-24">—</div>
       </div>
       <div class="nav-item" id="nav-25" onclick="goToPage(25)">
-        <div class="nav-icon">🅿️</div>
-        <div class="nav-label">Parking</div>
-        <div class="nav-check" id="chk-25">—</div>
-      </div>
-      <div class="nav-item" id="nav-26" onclick="goToPage(26)">
-        <div class="nav-icon">🔒</div>
-        <div class="nav-label">Sécurisation personnes</div>
-        <div class="nav-check" id="chk-26">—</div>
-      </div>
-      <div class="nav-item" id="nav-27" onclick="goToPage(27)">
         <div class="nav-icon">♿</div>
         <div class="nav-label">Dispositifs PMR</div>
-        <div class="nav-check" id="chk-27">—</div>
+        <div class="nav-check" id="chk-25">—</div>
       </div>
       </div>
 
       <div class="nav-section-label" style="margin-top:8px" onclick="toggleNavSection(this)"><span>📊 Synthèse</span><span class="nav-sec-arrow">›</span></div>
       <div class="nav-section-group" id="nav-grp-synthese">
-      <div class="nav-item" id="nav-28" onclick="goToPage(28)">
+      <div class="nav-item" id="nav-26" onclick="goToPage(26)">
         <div class="nav-icon">📊</div>
         <div class="nav-label">Synthèse & Rapport</div>
         <div class="nav-check" id="chk-28">—</div>
@@ -602,14 +796,32 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
       </div>
     </div>
     <div class="sidebar-sync">
-      <div class="sync-label">Synchronisation</div>
-      <div class="sync-btns">
-        <button class="btn-sync green" onclick="exportSession()"><span class="sync-icon">📧</span><span>Exporter &amp; envoyer par mail</span></button>
-        <button class="btn-sync blue" onclick="openImportModal('json')"><span class="sync-icon">📥</span><span>Importer une session</span></button>
-        <button class="btn-sync" onclick="openMergeModal()" style="border-color:rgba(255,255,255,0.25);background:rgba(76,175,80,0.15)"><span class="sync-icon">🔀</span><span>Fusionner une session</span></button>
-        <button class="btn-sync amber" onclick="openImportModal('excel')"><span class="sync-icon">📊</span><span>Importer depuis Excel</span></button>
-        <button class="btn-sync" onclick="generateTemplate()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">📋</span><span>Template Excel vierge</span></button>
+      <div style="display:flex;gap:0;margin-bottom:10px">
+        <button class="sync-tab active" id="stab-audit" onclick="switchSidebarTab('audit')">☁️ Audit</button>
+        <button class="sync-tab" id="stab-transfer" onclick="switchSidebarTab('transfer')">📁 Transfert</button>
       </div>
+      <div id="spanel-audit">
+        <div class="sync-btns">
+          <button class="btn-sync" onclick="newAudit()" style="border-color:rgba(100,220,140,0.5);background:rgba(100,220,140,0.15);font-weight:600"><span class="sync-icon">✨</span><span>Nouvel audit vierge</span></button>
+          <button class="btn-sync" onclick="openAuditHistory()" style="border-color:rgba(100,160,255,0.4);background:rgba(100,160,255,0.1)"><span class="sync-icon">📂</span><span>Historique des audits</span></button>
+          <button class="btn-sync" onclick="generatePDF()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">📄</span><span>Générer rapport PDF</span></button>
+          <button class="btn-sync" onclick="generateExcel()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">📊</span><span>Exporter Excel</span></button>
+        </div>
+      </div>
+      <div id="spanel-transfer" style="display:none">
+        <div class="sync-btns">
+          <button class="btn-sync" onclick="exportSession()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">📧</span><span>Exporter JSON &amp; mail</span></button>
+          <button class="btn-sync blue" onclick="openImportModal('json')"><span class="sync-icon">📥</span><span>Importer un fichier JSON</span></button>
+          <button class="btn-sync" onclick="openMergeModal()" style="border-color:rgba(255,255,255,0.25);background:rgba(76,175,80,0.15)"><span class="sync-icon">🔀</span><span>Fusionner une session</span></button>
+          <button class="btn-sync amber" onclick="openImportModal('excel')"><span class="sync-icon">📊</span><span>Importer depuis Excel</span></button>
+          <button class="btn-sync" onclick="generateTemplate()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">📋</span><span>Template Excel vierge</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="cloud-bar" id="cloud-bar">
+      <span class="cloud-dot disconnected" id="cloud-dot"></span>
+      <span class="cloud-user" id="cloud-user">Cloud : non connecté</span>
+      <span class="cloud-action" id="cloud-action" onclick="openFirebaseAuth()">Connexion</span>
     </div>
   </div>
 
@@ -1215,55 +1427,37 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
           <button class="btn-nav primary" onclick="saveDomainDirect(12)">Enregistrer ✓</button>
         </div>
         <div id="equip-container-12"></div>
-<div class="page-nav"><button class="btn-nav" onclick="goToPage(21)">← Espaces verts</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(23)">Sécurité Incendie →</button></div>
+<div class="page-nav"><button class="btn-nav" onclick="goToPage(21)">← Espaces verts</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(23)">Parking →</button></div>
       </div>
 
       <div class="page" id="page-23">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-          <div class="loc-tag" onclick="openLocModal()">📍 <span id="hse-loc-text-0">Définir la localisation</span></div>
-          <button class="btn-nav primary" onclick="saveHSEDirect()">Enregistrer ✓</button>
+          <div class="loc-tag" onclick="openLocModal()">📍 <span id="loc-text-12">Définir la localisation</span></div>
+          <button class="btn-nav primary" onclick="saveDomainDirect(13)">Enregistrer ✓</button>
         </div>
-        <div id="hse-container-0"></div>
-<div class="page-nav"><button class="btn-nav" onclick="goToPage(22)">← IT / Télécom</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(24)">Courant fort →</button></div>
+        <div id="equip-container-13"></div>
+<div class="page-nav"><button class="btn-nav" onclick="goToPage(22)">← IT / Télécom</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(24)">Sécu. personnes →</button></div>
       </div>
 
       <div class="page" id="page-24">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-          <div class="loc-tag" onclick="openLocModal()">📍 <span id="hse-loc-text-1">Définir la localisation</span></div>
-          <button class="btn-nav primary" onclick="saveHSEDirect()">Enregistrer ✓</button>
+          <div class="loc-tag" onclick="openLocModal()">📍 <span id="loc-text-13">Définir la localisation</span></div>
+          <button class="btn-nav primary" onclick="saveDomainDirect(14)">Enregistrer ✓</button>
         </div>
-        <div id="hse-container-1"></div>
-<div class="page-nav"><button class="btn-nav" onclick="goToPage(23)">← Sécurité Incendie</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(25)">Parking →</button></div>
+        <div id="equip-container-14"></div>
+<div class="page-nav"><button class="btn-nav" onclick="goToPage(23)">← Parking</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(25)">Dispositifs PMR →</button></div>
       </div>
 
       <div class="page" id="page-25">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-          <div class="loc-tag" onclick="openLocModal()">📍 <span id="hse-loc-text-2">Définir la localisation</span></div>
-          <button class="btn-nav primary" onclick="saveHSEDirect()">Enregistrer ✓</button>
+          <div class="loc-tag" onclick="openLocModal()">📍 <span id="loc-text-14">Définir la localisation</span></div>
+          <button class="btn-nav primary" onclick="saveDomainDirect(15)">Enregistrer ✓</button>
         </div>
-        <div id="hse-container-2"></div>
-<div class="page-nav"><button class="btn-nav" onclick="goToPage(24)">← Courant fort</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(26)">Sécurisation personnes →</button></div>
+        <div id="equip-container-15"></div>
+<div class="page-nav"><button class="btn-nav" onclick="goToPage(24)">← Sécu. personnes</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(26)">Synthèse & Rapport →</button></div>
       </div>
 
       <div class="page" id="page-26">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-          <div class="loc-tag" onclick="openLocModal()">📍 <span id="hse-loc-text-3">Définir la localisation</span></div>
-          <button class="btn-nav primary" onclick="saveHSEDirect()">Enregistrer ✓</button>
-        </div>
-        <div id="hse-container-3"></div>
-<div class="page-nav"><button class="btn-nav" onclick="goToPage(25)">← Parking</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(27)">Dispositifs PMR →</button></div>
-      </div>
-
-      <div class="page" id="page-27">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-          <div class="loc-tag" onclick="openLocModal()">📍 <span id="hse-loc-text-4">Définir la localisation</span></div>
-          <button class="btn-nav primary" onclick="saveHSEDirect()">Enregistrer ✓</button>
-        </div>
-        <div id="hse-container-4"></div>
-<div class="page-nav"><button class="btn-nav" onclick="goToPage(26)">← Sécurisation personnes</button><div class="nav-spacer"></div><button class="btn-nav primary" onclick="goToPage(28)">Synthèse & Rapport →</button></div>
-      </div>
-
-      <div class="page" id="page-28">
 
 
         <div class="stat-grid">
@@ -1361,7 +1555,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
         </div>
 
       
-<div class="page-nav"><button class="btn-nav" onclick="goToPage(27)">← Dispositifs PMR</button><div class="nav-spacer"></div><div class="nav-spacer"></div></div>
+<div class="page-nav"><button class="btn-nav" onclick="goToPage(25)">← Dispositifs PMR</button><div class="nav-spacer"></div><div class="nav-spacer"></div></div>
       </div>
 
     </div>
@@ -1413,9 +1607,12 @@ const DOMAINS = [
     {n:'Télécomptage', hint:'Présence, fonctionnement'},
     {n:'Éclairage extérieur', hint:'Type, commande, vétusté'},
     {n:'Éclairage intérieur', hint:'LED, fluorescent, commande'},
-    {n:'Groupe électrogène', hint:'Puissance, emplacement, test'},
-    {n:'Transformateur', hint:'Sec, huile, puissance'},
-    {n:'Panneaux photovoltaïques', hint:'Puissance crête, état, production'}
+    {n:'Groupe électrogène', hint:'Nombre, puissance, emplacement, test'},
+    {n:'Transformateur', hint:'Sec, huile, puissance, nombre'},
+    {n:'Panneaux photovoltaïques', hint:'Puissance crête, état, production'},
+    {n:'Cuve fuel', hint:'Contenance, type (enterrée/aérienne, simple/double peau), détection fuite'},
+    {n:'Onduleur', hint:'Puissance, autonomie'},
+    {n:'Protection foudre', hint:'Nombre, emplacements'}
   ]},
   {id:2, name:'CFA / Courants faibles', icon:'📡', equips:[
     {n:'Interphone / visiophonie', hint:'Type, état, couverture'},
@@ -1451,16 +1648,28 @@ const DOMAINS = [
     {n:'Qualité de l\'eau', hint:'Analyses, traitement, rapport'}
   ]},
   {id:6, name:'Sécurité incendie', icon:'🔥', equips:[
+    {n:'Accès services de secours', hint:'Voie publique, voie engin, voie échelle dédiée'},
+    {n:'Accessibilité façade', hint:'Accessibilité des façades aux véhicules de secours'},
+    {n:'Baies pompiers', hint:'Préciser les façades concernées'},
     {n:'SSI / Centrale incendie', hint:'Catégorie A/B/C, date installation'},
     {n:'Tableau répétiteur d\'alarme', hint:'Emplacement, état'},
-    {n:'Détection automatique incendie', hint:'Couverture, localisation'},
-    {n:'Désenfumage naturel', hint:'Zones, ouvrants, câblage'},
-    {n:'Désenfumage mécanique', hint:'Ventilateurs, conduits, déclenchement'},
-    {n:'Extinction automatique (sprinkler)', hint:'Type (eau, gaz, poudre), zones'},
-    {n:'Colonnes sèches / en charge', hint:'Nombre, emplacement, contrôle'},
-    {n:'RIA — Robinets incendie armés', hint:'Niveaux concernés, état'},
+    {n:'Déclencheurs manuels', hint:'Emplacements, état'},
+    {n:'Détection automatique incendie', hint:'Couverture, localisation (bureaux, locaux techniques…)'},
+    {n:'Indicateurs d\'action', hint:'Présence, état'},
+    {n:'Désenfumage naturel', hint:'Zones (plateaux, escaliers…), ouvrants, câblage'},
+    {n:'Désenfumage mécanique', hint:'Zones (plateaux, escaliers…), ventilateurs, conduits'},
+    {n:'Bouche d\'incendie privée', hint:'Nombre — si privées, à contrôler'},
+    {n:'Poteaux d\'incendie privés', hint:'Nombre — si privés, à contrôler'},
+    {n:'Extinction automatique (sprinkler)', hint:'Type (eau, gaz, poudre), zones couvertes'},
+    {n:'Colonnes sèches / en charge', hint:'Nombre, emplacements, super ou infrastructure'},
+    {n:'RIA — Robinets incendie armés', hint:'Zones ou niveaux concernés'},
+    {n:'Extincteurs', hint:'Nombre, type, date vérification'},
     {n:'Éclairage de sécurité BAES', hint:'BAES haut/bas, source centrale'},
-    {n:'Extincteurs', hint:'Nombre, type, date vérification'}
+    {n:'Déverrouillage des issues', hint:'Type, fonctionnement'},
+    {n:'Isolement coupe-feu', hint:'Portes CF, clapets, compartimentage'},
+    {n:'Plans intervention / évacuation', hint:'Présence, mise à jour'},
+    {n:'Poste de sécurité', hint:'Nombre d\'agents, qualifications SSIAP, plages horaires'},
+    {n:'Registre de sécurité', hint:'Consulté, mise à jour'}
   ]},
   {id:7, name:'Espaces communs', icon:'🏢', equips:[
     {n:'Faux plafonds parties communes', hint:'Nature, état, accès'},
@@ -1478,70 +1687,7 @@ const DOMAINS = [
     {n:'Signalétique / traçage', hint:'Marquage sol, panneaux, état'},
     {n:'Éclairage extérieur', hint:'Luminaires, mâts, commande'}
   ]},
-  {id:9, name:'HSE — Équipements techniques de sécurité', icon:'🛡️', categories:[
-    {label:'Sécurité incendie', equips:[
-      {n:'Accès services de secours',       hint:'Voie publique, voie engin, voie échelle dédiée'},
-      {n:'Accessibilité façade',            hint:'Accessibilité des façades aux véhicules de secours'},
-      {n:'Baies pompiers',                  hint:'Préciser les façades concernées'},
-      {n:'SSI',                             hint:'Préciser date d\'installation'},
-      {n:'Tableau répétiteur d\'alarme',    hint:'Préciser emplacement'},
-      {n:'Déclencheurs manuels',            hint:''},
-      {n:'Détection automatique incendie',  hint:'Localisation (bureaux, locaux techniques…)'},
-      {n:'Indicateurs d\'action',           hint:''},
-      {n:'Désenfumage naturel',             hint:'Zones (plateaux, escaliers…)'},
-      {n:'Désenfumage mécanique',           hint:'Zones (plateaux, escaliers…)'},
-      {n:'Bouche d\'incendie privée',       hint:'Préciser nombre — si privées, à contrôler'},
-      {n:'Poteaux d\'incendie privés',      hint:'Préciser nombre — si privés, à contrôler'},
-      {n:'Extinction automatique',          hint:'Type (eau, gaz, poudre…) et zones couvertes'},
-      {n:'Colonnes sèches / en charge',     hint:'Nombre, emplacements, super ou infrastructure'},
-      {n:'Robinets d\'incendie armés (RIA)',hint:'Zones ou niveaux concernés'},
-      {n:'Extincteurs',                     hint:''},
-      {n:'Éclairage de sécurité',           hint:'BAES et/ou source centrale'},
-      {n:'Déverrouillage des issues',       hint:''},
-      {n:'Isolement coupe-feu',             hint:''},
-      {n:'Plans intervention / évacuation', hint:''},
-      {n:'Poste de sécurité',              hint:'Nombre d\'agents, qualifications SSIAP, plages horaires'},
-      {n:'Registre de sécurité',           hint:'Mentionner si consulté + mise à jour'},
-      {n:'Autres',                          hint:''}
-    ]},
-    {label:'Courant fort', equips:[
-      {n:'Groupe électrogène', hint:'Nombre, puissance, emplacement'},
-      {n:'Cuve fuel',          hint:'Contenance, type (enterrée/aérienne, simple/double peau), détection fuite'},
-      {n:'Transformateur',     hint:'Sec, huile, puissance, nombre'},
-      {n:'Onduleur',           hint:''},
-      {n:'Protection foudre',  hint:'Nombre, emplacements'},
-      {n:'Autres',             hint:''}
-    ]},
-    {label:'Parking', equips:[
-      {n:'Extinction automatique',   hint:''},
-      {n:'Colonnes humides',         hint:''},
-      {n:'Colonnes sèches',          hint:''},
-      {n:'Extincteurs',              hint:''},
-      {n:'Bac à sable + pelle',      hint:''},
-      {n:'Désenfumage naturel',      hint:''},
-      {n:'Désenfumage mécanique',    hint:''},
-      {n:'Compartimentage',          hint:''},
-      {n:'Isolement coupe-feu',      hint:''},
-      {n:'BAES (haut, bas)',         hint:''},
-      {n:'Séparateur hydrocarbure',  hint:''}
-    ]},
-    {label:'Sécurisation des personnes', equips:[
-      {n:'Gardes-corps',    hint:''},
-      {n:'Lignes de vie',   hint:''},
-      {n:'Points d\'ancrage',hint:''},
-      {n:'Échelles',        hint:''},
-      {n:'Disconnecteur',   hint:''}
-    ]},
-    {label:'Dispositifs PMR', equips:[
-      {n:'Rampes d\'accès',               hint:'Zones (entrée ou intérieur)'},
-      {n:'Élévateurs PMR',                hint:'Nombre, emplacement'},
-      {n:'Interphonie / visiophonie',     hint:''},
-      {n:'Sanitaires PMR',                hint:'Nombre ou niveaux concernés'},
-      {n:'Flashs lumineux',               hint:''},
-      {n:'Dispositifs d\'évacuation / EAS',hint:'Préciser configuration'},
-      {n:'Autres',                        hint:''}
-    ]}
-  ]}
+  null // id:9 réservé (anciennement HSE catégorisé, fusionné dans les domaines terrain)
 ,
   {id:10, name:'Sûreté / Contrôle d\'accès', icon:'🔐', equips:[
     {n:'Vidéosurveillance', hint:'Caméras, enregistreur, écrans de contrôle'},
@@ -1566,6 +1712,34 @@ const DOMAINS = [
     {n:'Locaux techniques IT', hint:'Climatisation, accès, onduleur'},
     {n:'Réseau Wi-Fi', hint:'Bornes, couverture, contrôleur'},
     {n:'Téléphonie', hint:'Autocom, DECT, lignes analogiques'}
+  ]},
+  {id:13, name:'Parking', icon:'🅿️', equips:[
+    {n:'Extinction automatique', hint:'Type, zones couvertes'},
+    {n:'Colonnes humides', hint:'Nombre, emplacements'},
+    {n:'Colonnes sèches', hint:'Nombre, emplacements'},
+    {n:'Extincteurs', hint:'Nombre, type'},
+    {n:'Bac à sable + pelle', hint:'Emplacement'},
+    {n:'Désenfumage naturel', hint:'Zones'},
+    {n:'Désenfumage mécanique', hint:'Zones'},
+    {n:'Compartimentage', hint:'Niveaux, portes CF'},
+    {n:'Isolement coupe-feu', hint:'Portes, clapets'},
+    {n:'BAES (haut, bas)', hint:'État, couverture'},
+    {n:'Séparateur hydrocarbure', hint:'Type, entretien'}
+  ]},
+  {id:14, name:'Sécurisation des personnes', icon:'🔒', equips:[
+    {n:'Gardes-corps', hint:'Emplacements, conformité'},
+    {n:'Lignes de vie', hint:'Toiture, façade'},
+    {n:'Points d\'ancrage', hint:'Nombre, emplacements'},
+    {n:'Échelles', hint:'Type, sécurisation'},
+    {n:'Disconnecteur', hint:'Présence, contrôle'}
+  ]},
+  {id:15, name:'Dispositifs PMR', icon:'♿', equips:[
+    {n:'Rampes d\'accès', hint:'Zones (entrée ou intérieur)'},
+    {n:'Élévateurs PMR', hint:'Nombre, emplacement'},
+    {n:'Interphonie / visiophonie', hint:'Accessibilité'},
+    {n:'Sanitaires PMR', hint:'Nombre ou niveaux concernés'},
+    {n:'Flashs lumineux', hint:'Couverture'},
+    {n:'Dispositifs d\'évacuation / EAS', hint:'Préciser configuration'}
   ]}
 ];
 
@@ -1598,7 +1772,7 @@ function loadState(){
     S.terrain = terrainNorm;
 
     // Recharger les photos depuis leurs clés séparées
-    for(let d = 0; d <= 12; d++){
+    for(let d = 0; d <= 15; d++){
       const key = 'audittech_photos_'+d;
       const raw = localStorage.getItem(key);
       if(raw){
@@ -1681,6 +1855,8 @@ function saveState(){
   }
 
   showToast();
+  // Push vers Firebase Cloud si connecté
+  scheduleCloudPush();
 }
 
 let toastTimer;
@@ -1705,7 +1881,7 @@ function showPage(name, el){
   if(pageEl) pageEl.classList.add('active');
 
   // Nav desktop : retirer actif sur tous les nav principaux + hse9
-  ['nav-admin','nav-terrain','nav-synthese','nav-hse9'].forEach(id=>{
+  ['nav-admin','nav-terrain','nav-synthese'].forEach(id=>{
     const n=document.getElementById(id);
     if(n) n.classList.remove('active');
   });
@@ -1894,7 +2070,7 @@ function updateProgress(){
 // TERRAIN
 // ============================================================
 function equipCount(d){
-  if(d.categories) return d.categories.reduce((sum,cat)=>sum+cat.equips.length, 0);
+  if(!d || !d.equips) return 0;
   return d.equips.length;
 }
 
@@ -1902,7 +2078,7 @@ function buildDomainList(){
   const grid=document.getElementById('domain-grid');
   grid.innerHTML='';
   DOMAINS.forEach(d=>{
-    if(d.id===9) return; // HSE Sécurité a sa propre section dans la sidebar
+    if(!d || d.id===9) return; // domain 9 est désactivé
     const done=S.terrain[String(d.id)]; // FIX: clé string
     const card=document.createElement('div');
     card.className='domain-card'+(done?' done':'');
@@ -1922,23 +2098,14 @@ function openDomain(id){
   S.currentDomain=String(id); // FIX: toujours string
   const d=DOMAINS[id];
 
-  // Domaine 9 : afficher d'abord la grille des catégories
-  if(d.categories){
-    openHSECategoryList(d);
-    return;
-  }
-
   const saved=S.terrain[String(id)]||{loc:'',equips:{}}; // FIX: clé string
   S.currentLoc=saved.loc||'';
   document.getElementById('loc-label-text').textContent=S.currentLoc||'Définir la localisation';
   const container=document.getElementById('equip-forms');
   container.innerHTML='<div class="group-label">'+d.icon+' '+d.name+'</div>';
 
-  const uid_prefix = S.currentDomain;
   d.equips.forEach((eq,i)=>{
     const sv=saved.equips&&saved.equips[i]?saved.equips[i]:{};
-    const uid=uid_prefix+'-'+i;
-    const pcnt=(sv.photos||[]).filter(p=>p!==null).length;
     const wrap=document.createElement('div');
     wrap.className='equip-wrap';
     wrap.innerHTML=`
@@ -1966,17 +2133,11 @@ function openDomain(id){
           </div>
         </div>
         <textarea placeholder="Observations, désordres constatés, recommandations…" oninput="setObs(${i},this.value)">${esc(sv.obs)}</textarea>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="pzone-${uid}">
-          <div class="photo-zone" style="flex:1;min-width:120px" onclick="addPhoto(${i})">
-            <span class="photo-zone-icon">📸</span>
-            <span class="photo-zone-text">Caméra</span>
-          </div>
-          <div class="photo-zone" style="flex:1;min-width:120px" onclick="addPhotoGallery(${i})">
-            <span class="photo-zone-icon">🖼️</span>
-            <span class="photo-zone-text">Galerie <span id="pcnt-${uid}" style="background:rgba(0,0,0,0.1);border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px">${pcnt}/5</span></span>
-          </div>
+        <div class="photo-zone" id="pzone-${i}" onclick="addPhoto(${i})">
+          <span class="photo-zone-icon">📷</span>
+          <span class="photo-zone-text">Ajouter une photo <span id="pcnt-${i}" style="background:rgba(0,0,0,0.1);border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px">0/5</span></span>
         </div>
-        <div class="photo-previews" id="prev-${uid}"></div>
+        <div class="photo-previews" id="prev-${i}"></div>
       </div>`;
     container.appendChild(wrap);
     if(sv.photos&&sv.photos.length){
@@ -1989,129 +2150,15 @@ function openDomain(id){
   try{const m=document.querySelector(".main");if(m)m.scrollTop=0;else window.scrollTo(0,0);}catch(e){}
 }
 
-// Affiche la grille des catégories du domaine HSE (id=9)
-function openHSECategoryList(d){
-  const saved=S.terrain[String(d.id)]||{loc:'',equips:{}}; // FIX: clé string
-  S.currentLoc=saved.loc||'';
-
-  // Calculer les équipements remplis par catégorie
-  let globalEquipOffset=0;
-  const catStats=d.categories.map(cat=>{
-    const catEquips=cat.equips;
-    let filled=0;
-    catEquips.forEach((_,j)=>{
-      const eq=saved.equips&&saved.equips[globalEquipOffset+j];
-      if(eq&&eq.etat) filled++;
-    });
-    const result={label:cat.label, count:catEquips.length, filled, offset:globalEquipOffset};
-    globalEquipOffset+=catEquips.length;
-    return result;
-  });
-
-  const catIcons={'Sécurité incendie':'🔥','Courant fort':'⚡','Parking':'🅿️','Sécurisation des personnes':'🔒','Dispositifs PMR':'♿'};
-
-  const grid=document.getElementById('domain-grid');
-  grid.innerHTML=`<div class="group-label" style="grid-column:1/-1">🛡️ ${d.name}</div>`;
-
-  catStats.forEach((cat,ci)=>{
-    const card=document.createElement('div');
-    const done=cat.filled===cat.count && cat.count>0;
-    const partial=cat.filled>0 && !done;
-    card.className='domain-card'+(done?' done':'');
-    card.innerHTML=`
-      <div class="domain-num">${catIcons[cat.label]||'📋'}</div>
-      <div class="domain-info">
-        <div class="domain-name">${cat.label}</div>
-        <div class="domain-meta">${done?'✓ Complété':partial?cat.filled+'/'+cat.count+' renseignés':cat.count+' équipements'}</div>
-      </div>
-      <div class="domain-arrow">${done?'✓':'›'}</div>`;
-    card.onclick=()=>openHSECategory(d, ci, cat.offset);
-    grid.appendChild(card);
-  });
-
-  document.getElementById('view-list').classList.remove('hidden');
-  document.getElementById('view-detail').classList.add('hidden');
-  try{const m=document.querySelector(".main");if(m)m.scrollTop=0;else window.scrollTo(0,0);}catch(e){}
-}
-
-// Ouvre les équipements d'une catégorie HSE
-function openHSECategory(d, catIdx, equipOffset){
-  const cat=d.categories[catIdx];
-  const saved=S.terrain[String(d.id)]||{loc:'',equips:{}}; // FIX: clé string
-  S.currentLoc=saved.loc||'';
-  document.getElementById('loc-label-text').textContent=S.currentLoc||'Définir la localisation';
-
-  const container=document.getElementById('equip-forms');
-  const catIcons={'Sécurité incendie':'🔥','Courant fort':'⚡','Parking':'🅿️','Sécurisation des personnes':'🔒','Dispositifs PMR':'♿'};
-  container.innerHTML=`
-    <div class="group-label">${catIcons[cat.label]||'📋'} ${cat.label}</div>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px">🛡️ HSE — Équipements techniques de sécurité</div>`;
-
-  const hse_uid_prefix = S.currentDomain;
-  cat.equips.forEach((eq,j)=>{
-    const i=equipOffset+j; // index global dans S.terrain[9].equips
-    const sv=saved.equips&&saved.equips[i]?saved.equips[i]:{};
-    const uid=hse_uid_prefix+'-'+i;
-    const pcnt=(sv.photos||[]).filter(p=>p!==null).length;
-    const wrap=document.createElement('div');
-    wrap.className='equip-wrap';
-    wrap.innerHTML=`
-      <div class="equip-head">
-        <span>${eq.n}</span>
-        <span style="font-size:11px;color:var(--text3);font-weight:400">${eq.hint||''}</span>
-      </div>
-      <div class="equip-body">
-        <div class="equip-rating-row">
-          <div class="equip-rating-col">
-            <div class="rating-title">État</div>
-            <div class="rate-group">
-              <button class="rate-btn etat-bon ${sv.etat===1?'on':''}" onclick="setRate(this,'etat',1,${i})">✓ Bon</button>
-              <button class="rate-btn etat-moyen ${sv.etat===2?'on':''}" onclick="setRate(this,'etat',2,${i})">⚠ Moyen</button>
-              <button class="rate-btn etat-mauvais ${sv.etat===3?'on':''}" onclick="setRate(this,'etat',3,${i})">✗ Mauvais</button>
-            </div>
-          </div>
-          <div class="equip-rating-col">
-            <div class="rating-title">Criticité</div>
-            <div class="rate-group">
-              <button class="rate-btn crit-1 ${sv.crit===1?'on':''}" onclick="setRate(this,'crit',1,${i})">1 — Sans</button>
-              <button class="rate-btn crit-2 ${sv.crit===2?'on':''}" onclick="setRate(this,'crit',2,${i})">2 — Moyen</button>
-              <button class="rate-btn crit-3 ${sv.crit===3?'on':''}" onclick="setRate(this,'crit',3,${i})">3 — Fort</button>
-            </div>
-          </div>
-        </div>
-        <textarea placeholder="Observations, désordres constatés, recommandations…" oninput="setObs(${i},this.value)">${esc(sv.obs)}</textarea>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="pzone-${uid}">
-          <div class="photo-zone" style="flex:1;min-width:120px" onclick="addPhoto(${i})">
-            <span class="photo-zone-icon">📸</span>
-            <span class="photo-zone-text">Caméra</span>
-          </div>
-          <div class="photo-zone" style="flex:1;min-width:120px" onclick="addPhotoGallery(${i})">
-            <span class="photo-zone-icon">🖼️</span>
-            <span class="photo-zone-text">Galerie <span id="pcnt-${uid}" style="background:rgba(0,0,0,0.1);border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px">${pcnt}/5</span></span>
-          </div>
-        </div>
-        <div class="photo-previews" id="prev-${uid}"></div>
-      </div>`;
-    container.appendChild(wrap);
-    if(sv.photos&&sv.photos.length){
-      sv.photos.forEach((src,pi)=>{ if(src) addPhotoThumb(i,pi,src); });
-    }
-  });
-
-  document.getElementById('view-list').classList.add('hidden');
-  document.getElementById('view-detail').classList.remove('hidden');
-  try{const m=document.querySelector(".main");if(m)m.scrollTop=0;else window.scrollTo(0,0);}catch(e){}
-}
+// [REMOVED] openHSECategoryList — domain 9 categories system removed in HSE merge
+// [REMOVED] openHSECategory — domain 9 categories system removed in HSE merge
+// Stub to prevent runtime errors if called from legacy data
+function openHSECategoryList(){} function openHSECategory(){}
 
 function closeDomain(){
   document.getElementById('view-detail').classList.add('hidden');
   document.getElementById('view-list').classList.remove('hidden');
-  // Si on était dans une catégorie HSE, revenir à la grille HSE
-  if(String(S.currentDomain)==='9'){ // FIX: comparaison string
-    openHSECategoryList(DOMAINS[9]);
-  } else {
-    buildDomainList();
-  }
+  buildDomainList();
 }
 
 function initDomainData(i){
@@ -2322,7 +2369,7 @@ function confirmLoc(){
     const secIdx = parseInt(pd[0].split('-')[1]);
     var labelEl = null;
     if(secKey === 'terrain') labelEl = document.getElementById('loc-text-'+secIdx);
-    else if(secKey === 'hse') labelEl = document.getElementById('hse-loc-text-'+secIdx);
+    // hse pages removed — all terrain now
     if(labelEl) labelEl.textContent = S.currentLoc || 'Définir la localisation';
   }
   // Save loc in terrain data
@@ -2367,7 +2414,7 @@ function getHSENote(pct){
 // ============================================================
 function buildSynthese(){
   const done=Object.keys(S.terrain).length;
-  document.getElementById('s-domains').textContent=done+'/13';
+  document.getElementById('s-domains').textContent=done+'/15';
 
   let urgent=0,important=0,attn=0,totalScore=0,scoreCount=0,actions=[];
 
@@ -2375,12 +2422,10 @@ function buildSynthese(){
     const d=DOMAINS[did];
     if(!d) return;
     const domId = Number(did);
-    const equipList = d.categories
-      ? d.categories.reduce((arr,cat)=>arr.concat(cat.equips),[])
-      : d.equips;
+    const equipList = d.equips || [];
     Object.entries(domain.equips||{}).forEach(([eid,eq])=>{
       if(!eq||!eq.etat)return;
-      // Score technique : domaines 0-8 uniquement (domaine 9 = note risque HSE séparée)
+      // Score technique : tous les domaines actifs
       if(domId !== 9){
         scoreCount++;
         const etatPts = 4 - eq.etat;
@@ -2458,7 +2503,7 @@ function buildSynthese(){
   var capexBody = document.getElementById('capex-body');
   if(capexBody){
     var capexHtml = '';
-    for(var d = 0; d <= 12; d++){
+    for(var d = 0; d <= 15; d++){
       if(d === 9) continue;
       var dom = DOMAINS[d];
       if(!dom) continue;
@@ -2478,7 +2523,6 @@ function buildSynthese(){
 // Helper : retourne la liste plate des équipements d'un domaine (equips ou categories aplatis)
 function getDomainEquipList(dom){
   if(!dom) return [];
-  if(dom.categories) return dom.categories.reduce(function(arr,cat){return arr.concat(cat.equips);}, []);
   return dom.equips || [];
 }
 
@@ -3016,6 +3060,7 @@ function buildPDF(){
   // PAGES TERRAIN
   // =====================================================================
   DOMAINS.forEach(function(dom){
+    if(!dom) return; // domain 9 is null
     var dData=S.terrain[String(dom.id)]; // FIX: clé string
     if(!dData)return;
     doc.addPage();
@@ -3287,11 +3332,11 @@ function saveHSE(key,field,val){
 // toggleSidebarDomains intégrée dans showPage
 
 function updateSidebarDomains(){
-  for(let i=0;i<10;i++){
+  for(let i=0;i<=15;i++){
+    if(i===9) continue; // domain 9 removed
     const el=document.getElementById('sdc-'+i);
-    // Pour le domaine 9, le nav-item parent est nav-hse9 (pas sd-9)
-    const item=i===9 ? document.getElementById('nav-hse9') : document.getElementById('sd-'+i);
-    if(el&&S.terrain[String(i)]){ // FIX: clé string
+    const item=document.getElementById('sd-'+i);
+    if(el&&S.terrain[String(i)]){
       el.textContent='✓';
       el.style.background='rgba(255,255,255,0.3)';
       el.style.color='#fff';
@@ -3662,6 +3707,7 @@ function buildExcelFormatted(){
 
   // ---- DOMAINES TERRAIN ----
   DOMAINS.forEach(function(dom){
+    if(!dom) return;
     const did=String(dom.id);
     const d_data=terrain_data[did];
     if(!d_data) return;
@@ -3742,6 +3788,7 @@ function buildExcelFormatted(){
 
   const all_acts=[];
   DOMAINS.forEach(function(dom){
+    if(!dom) return;
     const did=String(dom.id);
     const d_data=terrain_data[did];
     if(!d_data) return;
@@ -3817,6 +3864,276 @@ function buildExcelFormatted(){
 // ============================================================
 // EXPORT / IMPORT SESSION (JSON) — synchronisation PC ↔ Mobile
 // ============================================================
+// ============================================================
+// TRANSFERT PAR CODE (copier-coller entre appareils)
+// ============================================================
+var _transferCode = '';
+
+function openTransferModal(){
+  document.getElementById('transfer-modal').classList.remove('hidden');
+  switchTransferTab('send');
+  document.getElementById('tr-status').className = 'transfer-status';
+  document.getElementById('tr-status').textContent = '';
+  document.getElementById('tr-code-input').value = '';
+  _transferCode = '';
+  // Masquer le bouton Partager si Web Share API non disponible
+  var shareBtn = document.getElementById('tr-btn-share');
+  if(shareBtn) shareBtn.style.display = navigator.share ? '' : 'none';
+}
+
+function closeTransferModal(){
+  document.getElementById('transfer-modal').classList.add('hidden');
+}
+
+function switchTransferTab(tab){
+  document.getElementById('tr-tab-send').classList.toggle('active', tab==='send');
+  document.getElementById('tr-tab-receive').classList.toggle('active', tab==='receive');
+  document.getElementById('tr-panel-send').style.display = tab==='send' ? '' : 'none';
+  document.getElementById('tr-panel-receive').style.display = tab==='receive' ? '' : 'none';
+  document.getElementById('tr-status').className = 'transfer-status';
+}
+
+function buildTransferPayload(includePhotos){
+  var payload = {
+    v: 2,
+    ts: Date.now(),
+    site: S.adminData['a-site'] || '',
+    aud: S.auditor || '',
+    ad: S.adminData || {},
+    ac: S.adminChips || {},
+    sc: S.singleChips || {},
+    ct: S.counters || [],
+    co: S.contracts || [],
+    inc: S.incidents || [],
+    cx: S.capex || {},
+    rg: S.registre || {},
+    tr: {}
+  };
+  // Photo couverture
+  if(includePhotos && S.coverPhoto){
+    payload.cp = S.coverPhoto;
+  }
+  Object.entries(S.terrain).forEach(function(entry){
+    var did = entry[0], domain = entry[1];
+    payload.tr[did] = { loc: domain.loc, eq: {} };
+    Object.entries(domain.equips || {}).forEach(function(eEntry){
+      var eid = eEntry[0], eq = eEntry[1];
+      if(!eq) return;
+      var eqData = { e: eq.etat, c: eq.crit, o: eq.obs || '' };
+      // Inclure les photos si demandé
+      if(includePhotos && eq.photos && eq.photos.some(function(p){ return p !== null; })){
+        eqData.ph = eq.photos.filter(function(p){ return p !== null; });
+      }
+      payload.tr[did].eq[eid] = eqData;
+    });
+  });
+  return payload;
+}
+
+// Recompresser une photo base64 pour le cloud (800px, JPEG 60%)
+function compressPhotoForCloud(base64src){
+  return new Promise(function(resolve){
+    var img = new Image();
+    img.onload = function(){
+      var MAX = 800;
+      var w = img.width, h = img.height;
+      if(w > MAX || h > MAX){
+        if(w > h){ h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.6));
+    };
+    img.onerror = function(){ resolve(base64src); }; // fallback : garder l'original
+    img.src = base64src;
+  });
+}
+
+// Construire le payload cloud avec photos compressées (asynchrone)
+function buildCloudPayload(){
+  return new Promise(function(resolve){
+    var payload = buildTransferPayload(true); // inclure les photos brutes
+    // Recompresser toutes les photos pour le cloud
+    var promises = [];
+    Object.entries(payload.tr).forEach(function(entry){
+      var did = entry[0], dData = entry[1];
+      Object.entries(dData.eq).forEach(function(eEntry){
+        var eid = eEntry[0], eq = eEntry[1];
+        if(eq.ph && eq.ph.length){
+          eq.ph.forEach(function(src, pi){
+            if(src){
+              promises.push(
+                compressPhotoForCloud(src).then(function(compressed){
+                  payload.tr[did].eq[eid].ph[pi] = compressed;
+                })
+              );
+            }
+          });
+        }
+      });
+    });
+    // Compresser aussi la cover photo
+    if(payload.cp){
+      promises.push(
+        compressPhotoForCloud(payload.cp).then(function(c){ payload.cp = c; })
+      );
+    }
+    if(promises.length === 0){ resolve(payload); return; }
+    Promise.all(promises).then(function(){ resolve(payload); }).catch(function(){ resolve(payload); });
+  });
+}
+
+function getTransferCode(){
+  if(_transferCode) return _transferCode;
+  var payload = buildTransferPayload();
+  var json = JSON.stringify(payload);
+  _transferCode = 'AT2|' + btoa(unescape(encodeURIComponent(json)));
+  return _transferCode;
+}
+
+function transferViaMail(){
+  try{
+    var code = getTransferCode();
+    var siteName = S.adminData['a-site'] || 'Audit';
+    var subject = encodeURIComponent('AuditTech — Session « ' + siteName + ' »');
+    var body = encodeURIComponent(
+      'Voici le code de transfert AuditTech.\n\n' +
+      'Pour importer sur l\'autre appareil :\n' +
+      '1. Ouvrir AuditTech\n' +
+      '2. Menu ☰ → 📲 Transférer → Recevoir\n' +
+      '3. Sélectionner tout le code ci-dessous et le coller\n\n' +
+      '--- DÉBUT DU CODE ---\n' +
+      code +
+      '\n--- FIN DU CODE ---'
+    );
+    window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+    showTransferStatus('ok', '📧 Mail ouvert — envoyez-le à vous-même, puis ouvrez-le sur l\'autre appareil.');
+  } catch(err){
+    showTransferStatus('err', 'Erreur : ' + err.message);
+  }
+}
+
+function transferViaShare(){
+  try{
+    var code = getTransferCode();
+    var siteName = S.adminData['a-site'] || 'Audit';
+    navigator.share({
+      title: 'AuditTech — Session « ' + siteName + ' »',
+      text: 'Code de transfert AuditTech (coller dans Recevoir) :\n\n' + code
+    }).then(function(){
+      showTransferStatus('ok', '✅ Partagé ! Ouvrez le message sur l\'autre appareil et copiez le code.');
+    }).catch(function(err){
+      if(err.name !== 'AbortError'){
+        showTransferStatus('err', 'Partage annulé ou non disponible.');
+      }
+    });
+  } catch(err){
+    showTransferStatus('err', 'Le partage n\'est pas disponible sur cet appareil. Utilisez l\'e-mail ou le copier.');
+  }
+}
+
+function transferViaCopy(){
+  try{
+    var code = getTransferCode();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(code).then(function(){
+        showTransferStatus('ok', '📋 Code copié ! Envoyez-le-vous (mail, WhatsApp, SMS…) puis collez-le sur l\'autre appareil.');
+      }).catch(function(){ fallbackCopy(code); });
+    } else {
+      fallbackCopy(code);
+    }
+  } catch(err){
+    showTransferStatus('err', 'Erreur : ' + err.message);
+  }
+}
+
+function fallbackCopy(code){
+  // Créer un textarea temporaire pour copier
+  var ta = document.createElement('textarea');
+  ta.value = code;
+  ta.style.cssText = 'position:fixed;top:-9999px;opacity:0';
+  document.body.appendChild(ta);
+  ta.select();
+  ta.setSelectionRange(0, code.length);
+  try{
+    document.execCommand('copy');
+    showTransferStatus('ok', '📋 Code copié ! Envoyez-le-vous puis collez-le sur l\'autre appareil.');
+  } catch(e){
+    showTransferStatus('err', 'Copie impossible. Utilisez « S\'envoyer par e-mail » à la place.');
+  }
+  document.body.removeChild(ta);
+}
+
+function importTransferCode(){
+  var code = document.getElementById('tr-code-input').value.trim();
+  if(!code){
+    showTransferStatus('err', 'Collez d\'abord le code dans le champ ci-dessus.');
+    return;
+  }
+  if(!code.startsWith('AT2|')){
+    showTransferStatus('err', 'Code invalide. Vérifiez que vous avez collé le code complet (commence par « AT2| »).');
+    return;
+  }
+  try{
+    var b64 = code.substring(4);
+    var json = decodeURIComponent(escape(atob(b64)));
+    var data = JSON.parse(json);
+    if(!data.v || data.v !== 2){
+      showTransferStatus('err', 'Format de code non reconnu.');
+      return;
+    }
+    // Appliquer les données
+    S.auditor = data.aud || '';
+    S.adminData = data.ad || {};
+    S.adminChips = data.ac || {};
+    S.singleChips = data.sc || {};
+    S.counters = data.ct || [];
+    S.contracts = data.co || [];
+    S.incidents = data.inc || [];
+    S.capex = data.cx || {};
+    S.registre = data.rg || {};
+    // Reconstituer terrain
+    S.terrain = {};
+    Object.entries(data.tr || {}).forEach(function(entry){
+      var did = entry[0], d = entry[1];
+      S.terrain[did] = { loc: d.loc || '', equips: {} };
+      Object.entries(d.eq || {}).forEach(function(eEntry){
+        var eid = eEntry[0], eq = eEntry[1];
+        S.terrain[did].equips[eid] = { etat: eq.e, crit: eq.c, obs: eq.o || '', photos: [] };
+      });
+    });
+    saveState();
+    // Reconstruire l'interface
+    for(var d=0; d<=15; d++){
+      var c = document.getElementById('equip-container-'+d);
+      if(c) c.innerHTML = '';
+    }
+    loadAdmin();
+    try{ buildHSETable(); }catch(e){}
+    try{ buildDomainList(); }catch(e){}
+    updateProgress();
+    try{ updateSidebarDomains(); }catch(e){}
+    try{ renderCounters(); renderContracts(); renderIncidents(); }catch(e){}
+
+    var domains = Object.keys(S.terrain).length;
+    var siteName = S.adminData['a-site'] || 'Session';
+    showTransferStatus('ok', '✅ Session « ' + esc(siteName) + ' » importée — ' + domains + ' domaine(s) terrain.');
+
+    // Fermer après un délai
+    setTimeout(function(){ closeTransferModal(); goToPage(0); }, 2500);
+  } catch(err){
+    showTransferStatus('err', 'Erreur de décodage : ' + err.message + '. Vérifiez que le code est complet.');
+  }
+}
+
+function showTransferStatus(type, msg){
+  var el = document.getElementById('tr-status');
+  el.className = 'transfer-status ' + type;
+  el.innerHTML = msg;
+}
+
 function exportSession(){
   // Créer une copie de S sans les photos (trop lourdes pour le transfert)
   // Les photos sont gardées séparément dans localStorage
@@ -3927,16 +4244,12 @@ function resetSession(){
   S.registre = {};
   try{
     localStorage.removeItem('audittech_v1');
-    for(var d = 0; d <= 12; d++) localStorage.removeItem('audittech_photos_'+d);
+    for(var d = 0; d <= 15; d++) localStorage.removeItem('audittech_photos_'+d);
     localStorage.removeItem('audittech_cover_photo');
   }catch(e){ console.warn('localStorage clear error:', e); }
   // Clear all equip containers
-  for(var d = 0; d <= 12; d++){
+  for(var d = 0; d <= 15; d++){
     var c = document.getElementById('equip-container-'+d);
-    if(c) c.innerHTML = '';
-  }
-  for(var h = 0; h < 5; h++){
-    var c = document.getElementById('hse-container-'+h);
     if(c) c.innerHTML = '';
   }
   // Clear listings
@@ -4048,12 +4361,8 @@ function importFromJSON(file){
       S.registre = data.registre || {};
       saveState();
       // Clear all equip containers to force rebuild
-      for(var d=0; d<=12; d++){
+      for(var d=0; d<=15; d++){
         var c = document.getElementById('equip-container-'+d);
-        if(c) c.innerHTML = '';
-      }
-      for(var h=0; h<5; h++){
-        var c = document.getElementById('hse-container-'+h);
         if(c) c.innerHTML = '';
       }
       // Recharger l'interface
@@ -4499,10 +4808,10 @@ loadState();
 // ============================================================
 // V2 PAGE NAVIGATION
 // ============================================================
-const PAGE_DEFS = [['admin-0', 'Identification du site', '🏢', 'Administration'], ['admin-1', 'Données techniques', '📐', 'Administration'], ['admin-2', 'Certifications & Labels', '🏆', 'Administration'], ['admin-3', 'Performance énergétique', '⚡', 'Administration'], ['admin-4', 'Diagnostics réglementaires', '📋', 'Administration'], ['admin-5', 'Contrats en cours', '📄', 'Administration'], ['admin-6', 'HSE — Vérif. réglementaires', '🛡️', 'Administration'], ['admin-7', 'Documents manquants', '⚠️', 'Administration'], ['admin-8', 'Compteurs', '🔢', 'Administration'], ['admin-9', 'Contrats maintenance', '📋', 'Administration'], ['admin-10', 'Historique sinistres', '📑', 'Administration'], ['terrain-0', 'Enveloppe', '🏗️', 'Partie terrain'], ['terrain-1', 'Courant fort', '⚡', 'Partie terrain'], ['terrain-2', 'CFA', '📡', 'Partie terrain'], ['terrain-3', 'CVC', '🌡️', 'Partie terrain'], ['terrain-4', 'Élévateurs', '🛗', 'Partie terrain'], ['terrain-5', 'Plomberie', '🔧', 'Partie terrain'], ['terrain-6', 'Sécu. incendie', '🔥', 'Partie terrain'], ['terrain-7', 'Esp. communs', '🏢', 'Partie terrain'], ['terrain-8', 'Espaces ext.', '🌿', 'Partie terrain'], ['terrain-9', 'Sûreté', '🔐', 'Partie terrain'], ['terrain-10', 'Espaces verts', '🌳', 'Partie terrain'], ['terrain-11', 'IT / Télécom', '🌐', 'Partie terrain'], ['hse-0', 'Sécurité Incendie', '🔥', 'HSE Sécurité'], ['hse-1', 'Courant fort', '⚡', 'HSE Sécurité'], ['hse-2', 'Parking', '🅿️', 'HSE Sécurité'], ['hse-3', 'Sécurisation personnes', '🔒', 'HSE Sécurité'], ['hse-4', 'Dispositifs PMR', '♿', 'HSE Sécurité'], ['synthese', 'Synthèse & Rapport', '📊', 'Synthèse']];
+const PAGE_DEFS = [['admin-0', 'Identification du site', '🏢', 'Administration'], ['admin-1', 'Données techniques', '📐', 'Administration'], ['admin-2', 'Certifications & Labels', '🏆', 'Administration'], ['admin-3', 'Performance énergétique', '⚡', 'Administration'], ['admin-4', 'Diagnostics réglementaires', '📋', 'Administration'], ['admin-5', 'Contrats en cours', '📄', 'Administration'], ['admin-6', 'HSE — Vérif. réglementaires', '🛡️', 'Administration'], ['admin-7', 'Documents manquants', '⚠️', 'Administration'], ['admin-8', 'Compteurs', '🔢', 'Administration'], ['admin-9', 'Contrats maintenance', '📋', 'Administration'], ['admin-10', 'Historique sinistres', '📑', 'Administration'], ['terrain-0', 'Enveloppe', '🏗️', 'HSE'], ['terrain-1', 'Courant fort', '⚡', 'HSE'], ['terrain-2', 'CFA', '📡', 'HSE'], ['terrain-3', 'CVC', '🌡️', 'HSE'], ['terrain-4', 'Élévateurs', '🛗', 'HSE'], ['terrain-5', 'Plomberie', '🔧', 'HSE'], ['terrain-6', 'Sécu. incendie', '🔥', 'HSE'], ['terrain-7', 'Esp. communs', '🏢', 'HSE'], ['terrain-8', 'Espaces ext.', '🌿', 'HSE'], ['terrain-9', 'Sûreté', '🔐', 'HSE'], ['terrain-10', 'Espaces verts', '🌳', 'HSE'], ['terrain-11', 'IT / Télécom', '🌐', 'HSE'], ['terrain-12', 'Parking', '🅿️', 'HSE'], ['terrain-13', 'Sécu. personnes', '🔒', 'HSE'], ['terrain-14', 'Dispositifs PMR', '♿', 'HSE'], ['synthese', 'Synthèse & Rapport', '📊', 'Synthèse']];
 
 Object.freeze(PAGE_DEFS);
-const SECTION_FIRST = {admin:0, terrain:11, hse:23, synthese:28};
+const SECTION_FIRST = {admin:0, terrain:11, synthese:26};
 const SECTION_GRP = {admin:'nav-grp-admin', terrain:'nav-grp-terrain', hse:'nav-grp-hse', synthese:'nav-grp-synthese'};
 
 function toggleNavSection(labelEl){
@@ -4577,14 +4886,6 @@ function goToPage(idx){
     // Always restore loc label (even if page already built)
     const locEl = document.getElementById('loc-text-'+terrIdx);
     if(locEl) locEl.textContent = S.currentLoc || 'Définir la localisation';
-  } else if(secKey === 'hse'){
-    const catIdx = parseInt(pd[0].split('-')[1]);
-    S.currentDomain = '9';
-    const savedH = S.terrain['9'] || {loc:'', equips:{}};
-    S.currentLoc = savedH.loc || '';
-    buildHSEPage(catIdx);
-    const hseLocEl = document.getElementById('hse-loc-text-'+catIdx);
-    if(hseLocEl) hseLocEl.textContent = S.currentLoc || 'Définir la localisation';
   } else if(pd[0] === 'synthese'){
     buildSynthese();
   } else if(pd[0] === 'admin-6'){
@@ -4647,40 +4948,8 @@ function buildTerrainPage(domIdx){
   });
 }
 
-// Build HSE equip forms for a category
-function buildHSEPage(catIdx){
-  const container = document.getElementById('hse-container-'+catIdx);
-  if(!container) return;
-  if(container.children.length > 0) return; // Already built
-  
-  S.currentDomain = '9';
-  const cat = DOMAINS[9].categories[catIdx];
-  const saved = S.terrain['9'] || {loc:'', equips:{}};
-  S.currentLoc = saved.loc || '';
-  
-  const locEl = document.getElementById('hse-loc-text-'+catIdx);
-  if(locEl) locEl.textContent = S.currentLoc || 'Définir la localisation';
-  
-  // Calculate equip offset
-  let offset = 0;
-  for(let c = 0; c < catIdx; c++) offset += DOMAINS[9].categories[c].equips.length;
-  
-  let html = '';
-  cat.equips.forEach((eq, j) => {
-    const i = offset + j;
-    const sv = saved.equips && saved.equips[i] ? saved.equips[i] : {};
-    html += buildEquipHTML(eq, i, sv);
-  });
-  container.innerHTML = html;
-  
-  cat.equips.forEach((eq, j) => {
-    const i = offset + j;
-    const sv = saved.equips && saved.equips[i] ? saved.equips[i] : {};
-    if(sv.photos && sv.photos.length){
-      sv.photos.forEach((src, pi) => { if(src) addPhotoThumb(i, pi, src); });
-    }
-  });
-}
+// [REMOVED] buildHSEPage — domain 9 categories removed in HSE merge
+function buildHSEPage(){}
 
 function buildEquipHTML(eq, i, sv){
   var pcnt = (sv.photos||[]).filter(function(p){return p;}).length;
@@ -4722,13 +4991,8 @@ function saveDomainDirect(domIdx){
   showToastMsg('✓ Domaine enregistré');
 }
 
-function saveHSEDirect(){
-  if(!S.terrain['9']) S.terrain['9']={equips:{}};
-  S.terrain['9'].loc = S.currentLoc;
-  saveState();
-  updateProgress();
-  showToastMsg('✓ HSE enregistré');
-}
+// [REMOVED] saveHSEDirect — domain 9 removed in HSE merge
+function saveHSEDirect(){}
 
 // Override the old showPage — no longer needed but keep for compatibility
 const _oldShowPage = showPage;
@@ -4737,7 +5001,7 @@ function showPage(name, el){
   // Map old page names to new indices
   if(name === 'admin') goToPage(0);
   else if(name === 'terrain') goToPage(11);
-  else if(name === 'synthese') goToPage(28);
+  else if(name === 'synthese') goToPage(26);
 }
 
 // Override updateProgress to update v2 sidebar checks
@@ -4750,8 +5014,8 @@ updateProgress = function(){
     if((el&&el.value) || S.adminData[id]) filled++;
   });
   const adminPct=Math.round((Math.min(filled,3)/3)*50);
-  const terrainKeys=Object.keys(S.terrain).filter(k=>Number(k)<9);
-  const terrainPct=Math.round((terrainKeys.length/9)*50);
+  const terrainKeys=Object.keys(S.terrain).filter(k=>{var n=Number(k); return n>=0 && n<=15 && n!==9;});
+  const terrainPct=Math.round((terrainKeys.length/15)*50);
   const total=adminPct+terrainPct;
   const dp=document.getElementById('desk-progress');
   const mp=document.getElementById('mob-progress');
@@ -4761,14 +5025,7 @@ updateProgress = function(){
   if(dpct) dpct.textContent=total+'%';
   
   // Update terrain checks in sidebar
-  for(let i=0;i<9;i++){
-    const el=document.getElementById('chk-'+(8+i));
-    if(el && S.terrain[String(i)]){
-      el.textContent='✓';
-      el.style.background='rgba(255,255,255,0.3)';
-      el.style.color='#fff';
-    }
-  }
+  try{ updateSidebarDomains(); }catch(e){}
 };
 
 
@@ -4950,8 +5207,8 @@ function importIncidentsXLS(input){
 // ============================================================
 function buildNonConformites(){
   var items = [];
-  for(var d = 0; d <= 12; d++){
-    if(d === 9) continue; // HSE handled separately
+  for(var d = 0; d <= 15; d++){
+    if(d === 9) continue; // domain 9 removed
     var dom = DOMAINS[d];
     if(!dom || !dom.equips) continue;
     var saved = S.terrain[String(d)] || {equips:{}};
@@ -4963,19 +5220,6 @@ function buildNonConformites(){
       }
     });
   }
-  // HSE domain 9
-  var d9 = S.terrain['9'] || {equips:{}};
-  var cats = DOMAINS[9] ? DOMAINS[9].categories : [];
-  var offset = 0;
-  cats.forEach(function(cat){
-    cat.equips.forEach(function(eq, i){
-      var sv = (d9.equips||{})[offset + i];
-      if(sv && sv.etat === 3 && sv.crit >= 2){
-        items.push({domain:'HSE — '+cat.name, icon:'🛡️', equip:eq.n, etat:sv.etat, crit:sv.crit, obs:sv.obs||''});
-      }
-    });
-    offset += cat.equips.length;
-  });
   return items;
 }
 
@@ -5225,18 +5469,6 @@ function buildMergeReport(incoming){
 }
 
 function getEquipName(domIdx, eqIdx){
-  if(domIdx === 9){
-    // HSE: find across categories
-    var offset=0;
-    var cats = DOMAINS[9].categories || [];
-    for(var c=0; c<cats.length; c++){
-      if(eqIdx < offset + cats[c].equips.length){
-        return cats[c].equips[eqIdx - offset].n || ('Équip. '+eqIdx);
-      }
-      offset += cats[c].equips.length;
-    }
-    return 'Équip. HSE '+eqIdx;
-  }
   if(DOMAINS[domIdx] && DOMAINS[domIdx].equips && DOMAINS[domIdx].equips[eqIdx]){
     return DOMAINS[domIdx].equips[eqIdx].n;
   }
@@ -5425,13 +5657,9 @@ function confirmMerge(){
   renderCounters(); renderContracts(); renderIncidents();
 
   // Force rebuild of terrain/HSE pages (clear containers so they rebuild with merged data)
-  for(var d=0; d<=12; d++){
+  for(var d=0; d<=15; d++){
     if(d===9) continue;
     var c = document.getElementById('equip-container-'+d);
-    if(c) c.innerHTML = '';
-  }
-  for(var h=0; h<5; h++){
-    var c = document.getElementById('hse-container-'+h);
     if(c) c.innerHTML = '';
   }
 
@@ -5446,8 +5674,6 @@ function confirmMerge(){
   var secKey = pd[0].split('-')[0];
   if(secKey === 'terrain'){
     buildTerrainPage(parseInt(pd[0].split('-')[1]));
-  } else if(secKey === 'hse'){
-    buildHSEPage(parseInt(pd[0].split('-')[1]));
   } else if(pd[0] === 'synthese'){
     buildSynthese();
   }
@@ -5458,9 +5684,612 @@ function initials(name){
   return name.split(/[\s.-]+/).map(function(w){return w.charAt(0).toUpperCase();}).join('').substring(0,3);
 }
 
+// ============================================================
+// SIDEBAR / MOBILE TABS
+// ============================================================
+function switchSidebarTab(tab){
+  document.getElementById('stab-audit').classList.toggle('active', tab==='audit');
+  document.getElementById('stab-transfer').classList.toggle('active', tab==='transfer');
+  document.getElementById('spanel-audit').style.display = tab==='audit' ? '' : 'none';
+  document.getElementById('spanel-transfer').style.display = tab==='transfer' ? '' : 'none';
+}
+function switchMobTab(tab){
+  document.getElementById('mtab-audit').classList.toggle('active', tab==='audit');
+  document.getElementById('mtab-transfer').classList.toggle('active', tab==='transfer');
+  document.getElementById('mpanel-audit').style.display = tab==='audit' ? '' : 'none';
+  document.getElementById('mpanel-transfer').style.display = tab==='transfer' ? '' : 'none';
+}
+
+// ============================================================
+// MULTI-AUDITS : NOUVEAU / HISTORIQUE
+// ============================================================
+var _currentAuditId = null;
+
+function generateAuditId(){
+  return 'aud_' + Date.now() + '_' + Math.random().toString(36).substring(2,8);
+}
+
+function getAuditSummary(){
+  var site = (S.adminData && S.adminData['a-site']) || '';
+  var addr = (S.adminData && S.adminData['a-address']) || '';
+  return { site: site, addr: addr, auditor: S.auditor || '', date: new Date().toISOString() };
+}
+
+function newAudit(){
+  // Demander confirmation si données existantes
+  var hasSomeData = S.auditor || (S.adminData && S.adminData['a-site']);
+  if(hasSomeData){
+    var siteName = (S.adminData && S.adminData['a-site']) || 'cet audit';
+    if(!confirm('Sauvegarder « ' + siteName + ' » dans l\'historique avant de créer un nouvel audit vierge ?')){
+      return;
+    }
+    // Archiver l'audit actuel
+    archiveCurrentAudit();
+  }
+  // Réinitialiser l'état
+  resetToBlankAudit();
+  showToastMsg('✨ Nouvel audit vierge créé');
+}
+
+function archiveCurrentAudit(){
+  var summary = getAuditSummary();
+  var id = _currentAuditId || generateAuditId();
+  var payload = buildTransferPayload(true); // Inclure les photos
+  payload._archived = Date.now();
+  payload._summary = summary;
+
+  // Sauvegarder en local
+  try{
+    var history = JSON.parse(localStorage.getItem('audittech_history') || '[]');
+    // Vérifier si déjà archivé (même id) — remplacer
+    var idx = history.findIndex(function(h){ return h.id === id; });
+    var entry = { id: id, summary: summary, data: payload };
+    if(idx >= 0){ history[idx] = entry; } else { history.unshift(entry); }
+    // Garder max 20 audits
+    if(history.length > 20) history = history.slice(0, 20);
+    localStorage.setItem('audittech_history', JSON.stringify(history));
+  }catch(e){ console.warn('archiveCurrentAudit local error:', e); }
+
+  // Sauvegarder dans Firebase si connecté
+  if(_fbUser && _fbDb){
+    try{
+      _fbDb.ref('users/' + _fbUser.uid + '/history/' + id).set({
+        summary: summary,
+        data: payload
+      }).catch(function(err){ console.warn('archive cloud error:', err); });
+    }catch(e){}
+  }
+}
+
+function resetToBlankAudit(){
+  _currentAuditId = generateAuditId();
+  // Vider tout l'état
+  S.adminData = {};
+  S.adminChips = {};
+  S.singleChips = {};
+  S.terrain = {};
+  S.auditor = '';
+  S.counters = [];
+  S.contracts = [];
+  S.incidents = [];
+  S.capex = {};
+  S.registre = {};
+  S.coverPhoto = null;
+  S.currentDomain = 0;
+  S.currentLoc = {};
+  // Vider les photos du localStorage
+  for(var d = 0; d <= 15; d++){
+    localStorage.removeItem('audittech_photos_' + d);
+  }
+  localStorage.removeItem('audittech_cover_photo');
+  // Sauvegarder l'état vierge
+  saveState();
+  // Mettre à jour les champs affichés
+  var deskAud = document.getElementById('desk-auditor');
+  var mobAud = document.getElementById('mob-auditor');
+  if(deskAud) deskAud.value = '';
+  if(mobAud) mobAud.value = '';
+  // Revenir à la page 0
+  goToPage(0);
+  updateProgress();
+}
+
+function openAuditHistory(){
+  // Charger l'historique local + cloud
+  var modal = document.getElementById('history-modal');
+  if(!modal) return;
+  modal.classList.remove('hidden');
+  renderHistoryList();
+
+  // Si connecté Firebase, synchroniser l'historique cloud
+  if(_fbUser && _fbDb){
+    _fbDb.ref('users/' + _fbUser.uid + '/history').once('value').then(function(snap){
+      var cloudHist = snap.val();
+      if(!cloudHist) return;
+      var localHist = JSON.parse(localStorage.getItem('audittech_history') || '[]');
+      var localIds = new Set(localHist.map(function(h){ return h.id; }));
+      // Ajouter les entrées cloud manquantes en local
+      var added = false;
+      Object.entries(cloudHist).forEach(function(entry){
+        var id = entry[0], val = entry[1];
+        if(!localIds.has(id)){
+          localHist.push({ id: id, summary: val.summary, data: val.data });
+          added = true;
+        }
+      });
+      if(added){
+        // Trier par date décroissante
+        localHist.sort(function(a,b){
+          var da = (a.data && a.data._archived) || 0;
+          var db = (b.data && b.data._archived) || 0;
+          return db - da;
+        });
+        localStorage.setItem('audittech_history', JSON.stringify(localHist));
+        renderHistoryList();
+      }
+    }).catch(function(){});
+  }
+}
+
+function closeHistory(){
+  document.getElementById('history-modal').classList.add('hidden');
+}
+
+function renderHistoryList(){
+  var list = document.getElementById('history-list');
+  if(!list) return;
+  var history = [];
+  try{ history = JSON.parse(localStorage.getItem('audittech_history') || '[]'); }catch(e){}
+  if(!history.length){
+    list.innerHTML = '<div class="history-empty">Aucun audit archivé.<br>Vos anciens audits apparaîtront ici.</div>';
+    return;
+  }
+  list.innerHTML = history.map(function(h, i){
+    var s = h.summary || {};
+    var name = s.site || 'Audit sans nom';
+    var dateStr = '';
+    if(s.date){
+      try{ var d = new Date(s.date); dateStr = d.toLocaleDateString('fr-FR') + ' — ' + (s.auditor || ''); }catch(e){}
+    }
+    return '<div class="history-item" onclick="restoreAudit(' + i + ')">' +
+      '<div class="hi-icon">🏢</div>' +
+      '<div class="hi-info">' +
+        '<div class="hi-name">' + esc(name) + '</div>' +
+        '<div class="hi-date">' + esc(dateStr) + '</div>' +
+      '</div>' +
+      '<button class="hi-del" onclick="event.stopPropagation();deleteHistoryItem(' + i + ')" title="Supprimer">🗑</button>' +
+    '</div>';
+  }).join('');
+}
+
+function restoreAudit(idx){
+  var history = [];
+  try{ history = JSON.parse(localStorage.getItem('audittech_history') || '[]'); }catch(e){}
+  if(!history[idx]) return;
+  var entry = history[idx];
+  var siteName = (entry.summary && entry.summary.site) || 'cet audit';
+  // Demander si on veut archiver l'audit en cours
+  var hasCurrent = S.auditor || (S.adminData && S.adminData['a-site']);
+  if(hasCurrent){
+    var currentName = (S.adminData && S.adminData['a-site']) || 'l\'audit en cours';
+    if(confirm('Sauvegarder « ' + currentName + ' » avant de restaurer « ' + siteName + ' » ?')){
+      archiveCurrentAudit();
+    }
+  }
+  // Restaurer
+  importCloudData(entry.data);
+  _currentAuditId = entry.id;
+  closeHistory();
+  showToastMsg('📂 Audit « ' + siteName + ' » restauré');
+}
+
+function deleteHistoryItem(idx){
+  var history = [];
+  try{ history = JSON.parse(localStorage.getItem('audittech_history') || '[]'); }catch(e){}
+  if(!history[idx]) return;
+  var entry = history[idx];
+  var name = (entry.summary && entry.summary.site) || 'cet audit';
+  if(!confirm('Supprimer « ' + name + ' » de l\'historique ?')) return;
+  // Supprimer de Firebase aussi
+  if(_fbUser && _fbDb && entry.id){
+    _fbDb.ref('users/' + _fbUser.uid + '/history/' + entry.id).remove().catch(function(){});
+  }
+  history.splice(idx, 1);
+  localStorage.setItem('audittech_history', JSON.stringify(history));
+  renderHistoryList();
+}
+
+// ============================================================
+// FIREBASE CLOUD SYNC
+// ============================================================
+var _fbApp = null, _fbAuth = null, _fbDb = null, _fbUser = null;
+var _fbSyncPaused = false, _fbSyncTimer = null;
+var _fbLoaded = false;
+
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyB0xf9PfdIxe5T1YotBDH-vHkwJAn5cPEo",
+  authDomain: "audittech-1b3ef.firebaseapp.com",
+  databaseURL: "https://audittech-1b3ef-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "audittech-1b3ef",
+  storageBucket: "audittech-1b3ef.firebasestorage.app",
+  messagingSenderId: "1050360592984",
+  appId: "1:1050360592984:web:8ec788f02e8b2c7ed0682d"
+};
+
+function loadFirebaseSDK(){
+  if(_fbLoaded) return Promise.resolve();
+  return new Promise(function(resolve, reject){
+    var base = 'https://www.gstatic.com/firebasejs/10.12.0/';
+    var scripts = [
+      base + 'firebase-app-compat.js',
+      base + 'firebase-auth-compat.js',
+      base + 'firebase-database-compat.js'
+    ];
+    var loaded = 0;
+    function loadNext(){
+      if(loaded >= scripts.length){ _fbLoaded = true; resolve(); return; }
+      var s = document.createElement('script');
+      s.src = scripts[loaded];
+      s.onload = function(){ loaded++; loadNext(); };
+      s.onerror = function(){ reject(new Error('Impossible de charger Firebase SDK')); };
+      document.head.appendChild(s);
+    }
+    loadNext();
+  });
+}
+
+function initFirebase(){
+  if(_fbApp) return;
+  _fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+  _fbAuth = firebase.auth();
+  _fbDb = firebase.database();
+  // Écouter les changements d'état de connexion
+  _fbAuth.onAuthStateChanged(function(user){
+    _fbUser = user;
+    updateCloudUI();
+    if(user){
+      listenForCloudChanges();
+      pushToCloud();
+    }
+  });
+}
+
+function updateCloudUI(){
+  var dot = document.getElementById('cloud-dot');
+  var user = document.getElementById('cloud-user');
+  var action = document.getElementById('cloud-action');
+  var mDot = document.getElementById('mob-cloud-dot');
+  var mUser = document.getElementById('mob-cloud-user');
+  var mBar = document.getElementById('mob-cloud-bar');
+  if(_fbUser){
+    var email = _fbUser.email || '';
+    var short = email.split('@')[0];
+    if(dot){ dot.className = 'cloud-dot online'; }
+    if(user){ user.textContent = '☁️ ' + short; }
+    if(action){ action.textContent = 'Déconnexion'; action.onclick = function(){ firebaseLogout(); }; }
+    if(mDot){ mDot.className = 'cloud-dot online'; }
+    if(mUser){ mUser.textContent = '☁️ ' + short; }
+    if(mBar){
+      mBar.innerHTML = '<span class="cloud-dot online" id="mob-cloud-dot"></span>' +
+        '<span style="flex:1">☁️ ' + esc(short) + '</span>' +
+        '<span style="color:var(--danger);font-weight:500;cursor:pointer" onclick="closeMobDrawer();firebaseLogout()">Déconnexion</span>';
+    }
+  } else {
+    if(dot){ dot.className = 'cloud-dot disconnected'; }
+    if(user){ user.textContent = 'Cloud : non connecté'; }
+    if(action){ action.textContent = 'Connexion'; action.onclick = function(){ openFirebaseAuth(); }; }
+    if(mDot){ mDot.className = 'cloud-dot disconnected'; }
+    if(mUser){ mUser.textContent = 'Cloud : non connecté'; }
+    if(mBar){
+      mBar.innerHTML = '<span class="cloud-dot disconnected"></span>' +
+        '<span style="flex:1">Cloud : non connecté</span>' +
+        '<span style="color:var(--accent);font-weight:500;cursor:pointer" onclick="closeMobDrawer();openFirebaseAuth()">Connexion</span>';
+    }
+  }
+}
+
+function openFirebaseAuth(){
+  loadFirebaseSDK().then(function(){
+    initFirebase();
+    if(_fbUser){
+      // Déjà connecté — proposer déconnexion
+      if(confirm('Vous êtes connecté en tant que ' + _fbUser.email + '.\n\nVoulez-vous vous déconnecter ?')){
+        firebaseLogout();
+      }
+      return;
+    }
+    document.getElementById('fb-auth-modal').classList.remove('hidden');
+    document.getElementById('fb-email').value = '';
+    document.getElementById('fb-password').value = '';
+    document.getElementById('fb-error').style.display = 'none';
+    document.getElementById('fb-info').style.display = 'none';
+    switchFbAuthMode('login');
+  }).catch(function(err){
+    showToastMsg('Erreur : ' + err.message);
+  });
+}
+
+function closeFbAuth(){
+  document.getElementById('fb-auth-modal').classList.add('hidden');
+}
+
+var _fbAuthMode = 'login';
+function switchFbAuthMode(mode){
+  _fbAuthMode = mode;
+  var title = document.getElementById('fb-auth-title');
+  var btn = document.getElementById('fb-auth-submit');
+  var switchEl = document.getElementById('fb-auth-switch');
+  if(mode === 'login'){
+    title.textContent = 'Connexion Cloud';
+    btn.textContent = 'Se connecter';
+    switchEl.textContent = 'Pas encore de compte ? Créer un compte';
+  } else {
+    title.textContent = 'Créer un compte';
+    btn.textContent = 'Créer le compte';
+    switchEl.textContent = 'Déjà un compte ? Se connecter';
+  }
+  document.getElementById('fb-error').style.display = 'none';
+  document.getElementById('fb-info').style.display = 'none';
+}
+
+function submitFbAuth(){
+  var email = document.getElementById('fb-email').value.trim();
+  var pw = document.getElementById('fb-password').value;
+  var errEl = document.getElementById('fb-error');
+  var infoEl = document.getElementById('fb-info');
+  errEl.style.display = 'none';
+  infoEl.style.display = 'none';
+  if(!email || !pw){
+    errEl.textContent = 'Veuillez remplir tous les champs.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if(pw.length < 6){
+    errEl.textContent = 'Le mot de passe doit contenir au moins 6 caractères.';
+    errEl.style.display = 'block';
+    return;
+  }
+  var btn = document.getElementById('fb-auth-submit');
+  btn.disabled = true;
+  btn.textContent = 'Connexion…';
+
+  var promise;
+  if(_fbAuthMode === 'login'){
+    promise = _fbAuth.signInWithEmailAndPassword(email, pw);
+  } else {
+    promise = _fbAuth.createUserWithEmailAndPassword(email, pw);
+  }
+  promise.then(function(){
+    btn.disabled = false;
+    closeFbAuth();
+    showToastMsg('☁️ Connecté au cloud');
+  }).catch(function(err){
+    btn.disabled = false;
+    btn.textContent = _fbAuthMode === 'login' ? 'Se connecter' : 'Créer le compte';
+    var msg = 'Erreur de connexion.';
+    if(err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential'){
+      msg = 'E-mail ou mot de passe incorrect.';
+    } else if(err.code === 'auth/email-already-in-use'){
+      msg = 'Cet e-mail est déjà utilisé. Connectez-vous plutôt.';
+    } else if(err.code === 'auth/weak-password'){
+      msg = 'Mot de passe trop faible (6 caractères minimum).';
+    } else if(err.code === 'auth/invalid-email'){
+      msg = 'Adresse e-mail invalide.';
+    } else if(err.code === 'auth/too-many-requests'){
+      msg = 'Trop de tentatives. Réessayez plus tard.';
+    }
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+  });
+}
+
+function firebaseLogout(){
+  if(_fbAuth){
+    _fbAuth.signOut().then(function(){
+      _fbUser = null;
+      updateCloudUI();
+      showToastMsg('Déconnecté du cloud');
+    });
+  }
+}
+
+// --- Push / Pull cloud data ---
+function getCloudPath(){
+  if(!_fbUser) return null;
+  return 'users/' + _fbUser.uid + '/audit';
+}
+
+function pushToCloud(){
+  if(!_fbUser || !_fbDb || _fbSyncPaused) return;
+  var path = getCloudPath();
+  if(!path) return;
+  try{
+    buildCloudPayload().then(function(payload){
+      payload._lastSync = Date.now();
+      payload._device = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+      payload._auditId = _currentAuditId || '';
+      // Vérifier la taille (limite Firebase ~10MB)
+      var json = JSON.stringify(payload);
+      if(json.length > 9500000){
+        // Trop gros : envoyer sans les photos
+        console.warn('Payload trop gros (' + (json.length/1024/1024).toFixed(1) + 'MB), envoi sans photos');
+        var lite = buildTransferPayload(false);
+        lite._lastSync = payload._lastSync;
+        lite._device = payload._device;
+        lite._auditId = payload._auditId;
+        lite._noPhotos = true;
+        _fbDb.ref(path).set(lite).catch(function(err){
+          console.warn('Cloud push error:', err);
+        });
+        return;
+      }
+      _fbDb.ref(path).set(payload).catch(function(err){
+        console.warn('Cloud push error:', err);
+      });
+    }).catch(function(e){
+      console.warn('pushToCloud async error:', e);
+    });
+  }catch(e){
+    console.warn('pushToCloud error:', e);
+  }
+}
+
+var _fbListener = null;
+function listenForCloudChanges(){
+  if(!_fbUser || !_fbDb) return;
+  // Détacher l'ancien listener
+  if(_fbListener){
+    _fbDb.ref(_fbListener).off();
+  }
+  var path = getCloudPath();
+  _fbListener = path;
+  _fbDb.ref(path).on('value', function(snapshot){
+    if(_fbSyncPaused) return;
+    var data = snapshot.val();
+    if(!data || !data.v) return;
+    // Ne pas écraser si c'est notre propre push (même device, même seconde)
+    var myDevice = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+    if(data._device === myDevice && data._lastSync && (Date.now() - data._lastSync < 3000)) return;
+    // Importer les données cloud
+    importCloudData(data);
+  });
+}
+
+function importCloudData(data){
+  _fbSyncPaused = true;
+  try{
+    // Réutiliser la logique d'import du transfer code
+    if(data.ad) S.adminData = data.ad;
+    if(data.ac) S.adminChips = data.ac;
+    if(data.sc) S.singleChips = data.sc;
+    if(data.aud) S.auditor = data.aud;
+    if(data.ct) S.counters = data.ct;
+    if(data.co) S.contracts = data.co;
+    if(data.inc) S.incidents = data.inc;
+    if(data.cx) S.capex = data.cx;
+    if(data.rg) S.registre = data.rg;
+    // Restaurer la cover photo si présente
+    if(data.cp){
+      S.coverPhoto = data.cp;
+      try{ localStorage.setItem('audittech_cover_photo', data.cp); }catch(e){}
+    }
+    if(data.tr){
+      Object.entries(data.tr).forEach(function(entry){
+        var dId = entry[0], dData = entry[1];
+        if(!S.terrain[dId]) S.terrain[dId] = {loc:'', equips:{}};
+        if(dData.loc) S.terrain[dId].loc = dData.loc;
+        if(dData.eq){
+          Object.entries(dData.eq).forEach(function(eEntry){
+            var eId = eEntry[0], eq = eEntry[1];
+            if(!S.terrain[dId].equips[eId]) S.terrain[dId].equips[eId] = {etat:'', crit:'', obs:'', photos:[]};
+            S.terrain[dId].equips[eId].etat = eq.e || '';
+            S.terrain[dId].equips[eId].crit = eq.c || '';
+            if(eq.o) S.terrain[dId].equips[eId].obs = eq.o;
+            // Restaurer les photos depuis le cloud
+            if(eq.ph && eq.ph.length){
+              S.terrain[dId].equips[eId].photos = eq.ph.slice();
+            }
+          });
+        }
+      });
+    }
+    // Sauvegarder localement
+    saveState();
+    // Rafraîchir l'affichage
+    // Rafraîchir la page visible
+    try{ goToPage(_currentPage); }catch(e){}
+    updateProgress();
+    showToastMsg('☁️ Données synchronisées');
+  }catch(e){
+    console.warn('importCloudData error:', e);
+  }
+  setTimeout(function(){ _fbSyncPaused = false; }, 2000);
+}
+
+// Debounced cloud push — appelé après chaque saveState
+var _cloudPushTimer = null;
+function scheduleCloudPush(){
+  if(!_fbUser) return;
+  clearTimeout(_cloudPushTimer);
+  _cloudPushTimer = setTimeout(function(){
+    pushToCloud();
+  }, 2000);
+}
+
+// Auto-init : tenter la reconnexion si déjà authentifié
+window.addEventListener('load', function(){
+  // Charger Firebase en arrière-plan pour auto-reconnexion
+  setTimeout(function(){
+    loadFirebaseSDK().then(function(){
+      initFirebase();
+    }).catch(function(){});
+  }, 1500);
+});
+
 </script>
 
 <!-- IMPORT MODAL -->
+<!-- MODAL TRANSFERT -->
+<div class="transfer-modal hidden" id="transfer-modal" onclick="if(event.target===this)closeTransferModal()">
+  <div class="transfer-card">
+    <div style="font-size:16px;font-weight:600;margin-bottom:4px">📲 Transférer la session</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Envoyez vos données d'un appareil à l'autre — sans fichier.</div>
+
+    <div class="transfer-tabs">
+      <button class="transfer-tab active" id="tr-tab-send" onclick="switchTransferTab('send')">📤 Envoyer</button>
+      <button class="transfer-tab" id="tr-tab-receive" onclick="switchTransferTab('receive')">📥 Recevoir</button>
+    </div>
+
+    <!-- Onglet ENVOYER -->
+    <div id="tr-panel-send">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.5">Choisissez comment envoyer la session vers votre autre appareil :</div>
+
+      <div class="transfer-send-methods" id="tr-send-methods">
+        <button class="btn-send-method highlight" onclick="transferViaMail()">
+          <span class="sm-icon">📧</span>
+          <div>
+            <div class="sm-text">S'envoyer par e-mail</div>
+            <div class="sm-hint">Ouvrez le mail sur l'autre appareil et copiez le code</div>
+          </div>
+        </button>
+        <button class="btn-send-method" onclick="transferViaShare()" id="tr-btn-share">
+          <span class="sm-icon">📤</span>
+          <div>
+            <div class="sm-text">Partager (WhatsApp, SMS, Notes…)</div>
+            <div class="sm-hint">Envoyez-vous le code via n'importe quelle appli</div>
+          </div>
+        </button>
+        <button class="btn-send-method" onclick="transferViaCopy()">
+          <span class="sm-icon">📋</span>
+          <div>
+            <div class="sm-text">Copier dans le presse-papier</div>
+            <div class="sm-hint">Pour coller dans une note ou un message vous-même</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="transfer-actions">
+        <button class="btn-transfer secondary" onclick="closeTransferModal()">Fermer</button>
+      </div>
+    </div>
+
+    <!-- Onglet RECEVOIR -->
+    <div id="tr-panel-receive" style="display:none">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5">Collez le code reçu par mail, WhatsApp ou SMS :</div>
+      <textarea class="transfer-code-box" id="tr-code-input" placeholder="Collez ici le code (commence par AT2|)…"></textarea>
+      <div class="transfer-actions">
+        <button class="btn-transfer primary" onclick="importTransferCode()">📥 Importer la session</button>
+        <button class="btn-transfer secondary" onclick="closeTransferModal()">Annuler</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:10px;line-height:1.5;padding:0 4px">
+        💡 Sur l'autre appareil, vous avez choisi « Envoyer ». Ouvrez le mail ou le message reçu, sélectionnez tout le code (de <code>AT2|</code> jusqu'à la fin), copiez-le, puis collez-le ci-dessus.
+      </div>
+    </div>
+
+    <div class="transfer-status" id="tr-status"></div>
+  </div>
+</div>
+
 <div class="import-modal hidden" id="import-modal">
   <div class="import-card">
     <div class="import-title" id="import-modal-title">📥 Importer une session</div>
@@ -5529,6 +6358,33 @@ function initials(name){
     <div class="import-actions" id="merge-close-row">
       <button class="btn-cancel-import" onclick="closeMergeModal()">Fermer</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIQUE DES AUDITS -->
+<div class="history-modal hidden" id="history-modal" onclick="if(event.target===this)closeHistory()">
+  <div class="history-card">
+    <h3>📂 Historique des audits</h3>
+    <div class="h-sub">Sélectionnez un ancien audit pour le restaurer. L'audit en cours sera sauvegardé automatiquement.</div>
+    <div class="history-list" id="history-list"></div>
+    <button style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--rad-sm);background:var(--surface2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text)" onclick="closeHistory()">Fermer</button>
+  </div>
+</div>
+
+<!-- MODAL AUTH FIREBASE -->
+<div class="fb-auth-modal hidden" id="fb-auth-modal" onclick="if(event.target===this)closeFbAuth()">
+  <div class="fb-auth-card">
+    <h3 id="fb-auth-title">Connexion Cloud</h3>
+    <div class="fb-sub">Connectez-vous pour synchroniser automatiquement vos audits entre vos appareils.</div>
+    <div class="fb-error" id="fb-error"></div>
+    <div class="fb-info" id="fb-info"></div>
+    <label>Adresse e-mail</label>
+    <input type="email" id="fb-email" placeholder="votre@email.com" autocomplete="email">
+    <label>Mot de passe</label>
+    <input type="password" id="fb-password" placeholder="6 caractères minimum" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitFbAuth()">
+    <button class="fb-btn fb-btn-primary" id="fb-auth-submit" onclick="submitFbAuth()">Se connecter</button>
+    <button class="fb-btn fb-btn-secondary" onclick="closeFbAuth()">Annuler</button>
+    <div class="fb-switch" id="fb-auth-switch" onclick="switchFbAuthMode(_fbAuthMode==='login'?'register':'login')">Pas encore de compte ? Créer un compte</div>
   </div>
 </div>
 

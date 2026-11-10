@@ -1,4 +1,4 @@
-const CACHE_NAME = 'audittech-v2.1';
+const CACHE_NAME = 'audittech-v2.2';
 
 const APP_SHELL = [
   './',
@@ -14,6 +14,9 @@ const CDN_LIBS = [
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
 ];
+
+// Firebase domains — passthrough, never cache
+const FIREBASE_DOMAINS = ['firebaseio.com', 'firebasedatabase.app', 'googleapis.com', 'gstatic.com', 'identitytoolkit.googleapis.com', 'securetoken.googleapis.com'];
 
 // Install: precache app shell
 self.addEventListener('install', event => {
@@ -35,13 +38,15 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch strategy:
-// - App shell (same-origin): Cache First, fallback network
-// - CDN libs: Network First, fallback cache (allows offline use after first load)
-// - Google Fonts CSS/woff2: Cache First (fonts don't change)
-// - Everything else: Network First
+// Fetch strategy
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+
+  // Firebase — always network, never cache (realtime data + auth)
+  if (FIREBASE_DOMAINS.some(d => url.hostname.includes(d))) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   // App shell — Cache First
   if (url.origin === self.location.origin) {
@@ -55,7 +60,6 @@ self.addEventListener('fetch', event => {
           return response;
         });
       }).catch(() => {
-        // Offline fallback for navigation
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
@@ -64,7 +68,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Google Fonts — Cache First (stable resources)
+  // Google Fonts — Cache First
   if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
     event.respondWith(
       caches.match(event.request).then(cached => {
@@ -80,7 +84,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // CDN libs (jsPDF, SheetJS) — Network First, cache for offline
+  // CDN libs — Network First, cache for offline
   if (url.hostname.includes('cdnjs.cloudflare.com')) {
     event.respondWith(
       fetch(event.request).then(response => {
