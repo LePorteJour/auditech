@@ -2410,6 +2410,41 @@ function calcHSEScore(){
   return Math.round((raw - 1) / 2 * 100);  // 0% = risque nul, 100% = risque maximum
 }
 
+// ============================================================
+// LISTE DES ACTIONS — règle unique (écran, PDF, Excel)
+// Seuls les états dégradés (Moyen) ou critiques (Mauvais) remontent.
+// Tri : sujets HSE d'abord, puis criticité (urgent > important > à surveiller), puis état.
+// ============================================================
+function buildActionList(terrain){
+  var list = [];
+  DOMAINS.forEach(function(dom){
+    if(!dom) return;
+    var dData = (terrain||{})[String(dom.id)];
+    if(!dData) return;
+    var equipList = getDomainEquipList(dom);
+    Object.entries(dData.equips||{}).forEach(function(entry){
+      var eid = entry[0], eq = entry[1];
+      if(!eq || !(eq.etat >= 2)) return;            // Bon ou non noté : exclu
+      var crit = eq.crit || 0;
+      var prio = crit === 3 ? 1 : crit === 2 ? 2 : 3;
+      list.push({
+        hse: HSE_RISK_DOMAINS.indexOf(dom.id) !== -1,
+        domId: dom.id, domaine: dom.name, icon: dom.icon || '',
+        equip: equipList[eid] ? equipList[eid].n : '—',
+        loc: dData.loc || '', obs: eq.obs || '',
+        etat: eq.etat, crit: crit, prio: prio,
+        label: prio === 1 ? 'Urgent' : prio === 2 ? 'Important' : 'À surveiller'
+      });
+    });
+  });
+  list.sort(function(a,b){
+    if(a.hse !== b.hse) return a.hse ? -1 : 1;
+    if(a.prio !== b.prio) return a.prio - b.prio;
+    return b.etat - a.etat;
+  });
+  return list;
+}
+
 function getHSENote(pct){
   if(pct === null) return {note:'—', lbl:'Non évalué', sub:"Notez au moins un équipement en Sécurité incendie, Sûreté ou Sécurisation des personnes.", cls:'hse-none'};
   if(pct <= 20)   return {note:'A', lbl:'Risque faible',      sub:'Les équipements de sécurité sont en bon état général.', cls:'hse-A'};
@@ -2442,12 +2477,11 @@ function buildSynthese(){
         const critPts = eq.crit ? 4 - eq.crit : 2;
         totalScore += etatPts * 0.6 + critPts * 0.4;
       }
-      const eqName = equipList[eid] ? equipList[eid].n : '—';
-      if(eq.crit===3){urgent++;actions.push({label:'Urgent',badge:'urg',equip:eqName,loc:domain.loc,obs:eq.obs,crit:3,etat:eq.etat});}
-      else if(eq.crit===2){important++;actions.push({label:'Important',badge:'imp',equip:eqName,loc:domain.loc,obs:eq.obs,crit:2,etat:eq.etat});}
-      else if(eq.etat>=2){attn++;actions.push({label:'À surveiller',badge:'surv',equip:eqName,loc:domain.loc,obs:eq.obs,crit:1,etat:eq.etat});}
     });
   });
+  actions = buildActionList(S.terrain);
+  urgent = actions.filter(function(a){ return a.prio === 1; }).length;
+  important = actions.filter(function(a){ return a.prio === 2; }).length;
 
   document.getElementById('s-urgent').textContent=urgent;
   document.getElementById('s-important').textContent=important;
@@ -2492,12 +2526,11 @@ function buildSynthese(){
   if(actions.length===0){
     al.innerHTML='<div style="padding:16px 18px;color:var(--text3);font-size:13px">Aucune action à lister pour le moment.</div>';
   } else {
-    actions.sort((a,b)=>b.crit-a.crit);
     al.innerHTML=actions.map(a=>`
       <div class="action-item">
-        <span class="action-badge badge-${a.badge}">${a.label}</span>
+        <span class="action-badge badge-${a.prio===1?'urg':a.prio===2?'imp':'surv'}">${a.label}</span>
         <div>
-          <div class="action-text">${esc(a.equip)}</div>
+          <div class="action-text">${a.hse?'<span style="display:inline-block;background:#1565c0;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:1px">HSE</span>':''}${esc(a.equip)} <span style="color:var(--text3);font-weight:400;font-size:12px">· ${esc(a.domaine)} · ${a.etat===3?'Mauvais':'Moyen'}</span></div>
           <div class="action-loc">${a.loc?'📍 '+esc(a.loc):''} ${a.obs?'— '+esc(a.obs.substring(0,80))+(a.obs.length>80?'…':''):''}</div>
         </div>
       </div>`).join('');
@@ -2627,10 +2660,9 @@ function buildPDF(){
       var critPts=eq.crit?4-eq.crit:2;
       scoreTotal+=(etatPts*0.6+critPts*0.4);
       scoreCount++;
-      if(eq.crit===3)urgent++;
-      else if(eq.crit===2)important++;
     });
   });
+  buildActionList(S.terrain).forEach(function(a){ if(a.prio===1)urgent++; else if(a.prio===2)important++; });
   var scoreRaw=scoreCount>0?scoreTotal/(scoreCount*3):null;
   var score=scoreRaw!==null?Math.round(scoreRaw*100):null;
   var domDone=Object.keys(S.terrain).length;
@@ -3151,27 +3183,13 @@ function buildPDF(){
   doc.addPage();
   pdfHeader(doc,pdfTxt("Plan d'actions priorisé"),CORA,W,ML,MR);
   var ay=MT+28;
-  var allActions=[];
-  Object.entries(S.terrain).forEach(function(entry){
-    var did=entry[0],domain=entry[1];
-    var dom=DOMAINS[did];
-    if(!dom) return;
-    var domEquipList=getDomainEquipList(dom);
-    Object.entries(domain.equips||{}).forEach(function(entry2){
-      var eid=entry2[0],eq=entry2[1];
-      if(!eq||!eq.etat)return;
-      if(eq.etat>=2||eq.crit>=2){
-        allActions.push({
-          priorite:eq.crit===3?'URGENT':eq.crit===2?'IMPORTANT':'A SURVEILLER',
-          prio:eq.crit===3?1:eq.crit===2?2:3,
-          domaine:dom.name,equip:domEquipList[eid]?domEquipList[eid].n:'--',
-          loc:domain.loc||'--',
-          etat:eq.etat===1?'Bon':eq.etat===2?'Moyen':'Mauvais',obs:eq.obs||''
-        });
-      }
-    });
+  var allActions=buildActionList(S.terrain).map(function(a){
+    return {
+      priorite:a.prio===1?'URGENT':a.prio===2?'IMPORTANT':'A SURVEILLER',
+      domaine:(a.hse?'[HSE] ':'')+a.domaine, equip:a.equip, loc:a.loc||'--',
+      etat:a.etat===3?'Mauvais':'Moyen', obs:a.obs
+    };
   });
-  allActions.sort(function(a,b){return a.prio-b.prio;});
   if(allActions.length===0){
     doc.setTextColor(90,90,90);doc.setFontSize(10);
     doc.text('Aucune action a signaler.',ML,ay+10);
@@ -3422,9 +3440,9 @@ function buildExcelFormatted(){
       if(!eq||!eq.etat)return;
       scoreTotal+=(4-eq.etat)*0.6+((eq.crit?4-eq.crit:2))*0.4;
       scoreCount++;
-      if(eq.crit===3)urgent++;else if(eq.crit===2)important++;
     });
   });
+  buildActionList(terrain_data).forEach(function(a){ if(a.prio===1)urgent++; else if(a.prio===2)important++; });
   const score=scoreCount>0?Math.round(scoreTotal/(scoreCount*3)*100):null;
   const domDone=Object.keys(terrain_data).length;
 
@@ -3797,28 +3815,13 @@ function buildExcelFormatted(){
   });
   r++;
 
-  const all_acts=[];
-  DOMAINS.forEach(function(dom){
-    if(!dom) return;
-    const did=String(dom.id);
-    const d_data=terrain_data[did];
-    if(!d_data) return;
-    const equips_data=d_data.equips||{};
-    getDomainEquipList(dom).forEach(function(eq,i){
-      const ev=equips_data[String(i)]||equips_data[i]||{};
-      if(!ev||!ev.etat) return;
-      if(ev.etat>=2||ev.crit>=2){
-        const cv=ev.crit||0;
-        all_acts.push({
-          prio:cv===3?1:cv===2?2:3,
-          priorite:cv===3?'URGENT':cv===2?'IMPORTANT':'A SURVEILLER',
-          domaine:dom.name,equip:eq.n,loc:d_data.loc||'—',
-          etat:ETAT_MAP[ev.etat]||'—',crit:CRIT_MAP[ev.crit]||'—',obs:ev.obs||''
-        });
-      }
-    });
+  const all_acts=buildActionList(terrain_data).map(function(a){
+    return {
+      prio:a.prio, priorite:a.prio===1?'URGENT':a.prio===2?'IMPORTANT':'A SURVEILLER',
+      domaine:(a.hse?'HSE — ':'')+a.domaine, equip:a.equip, loc:a.loc||'—',
+      etat:ETAT_MAP[a.etat]||'—', crit:CRIT_MAP[a.crit]||'—', obs:a.obs
+    };
   });
-  all_acts.sort(function(a,b){return a.prio-b.prio;});
 
   all_acts.forEach(function(a,i){
     const bg=i%2===0?'F5F3F0':'FFFFFF';
@@ -6436,7 +6439,7 @@ function showSyncDiag(){
   h += '<div style="background:#f5f5f5;border-radius:8px;padding:10px;font-size:12px;line-height:1.7;margin-bottom:10px">';
   h += '<b>Compte :</b> ' + (_fbUser ? esc(_fbUser.email) : '❌ non connecté') + '<br>';
   h += '<b>Cet appareil :</b> ' + esc(loc.site) + ' — ' + loc.eq + ' équipements, ' + loc.ph + ' photos<br>';
-  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-6';
+  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-7';
   h += '</div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   h += '<button onclick="diagForcePush()" style="' + btn + 'background:#388e3c">📤 Envoyer cet appareil vers le cloud</button>';
