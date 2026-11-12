@@ -2150,6 +2150,15 @@ function setRate(btn,type,val,i){
 
 // FIX: debounce pour éviter saveState à chaque frappe clavier
 let _obsTimer;
+var _cmTimer = null;
+function setDomainComment(domIdx, val){
+  var dk = String(domIdx);
+  if(!S.terrain[dk]) S.terrain[dk] = {loc: S.currentLoc || '', equips: {}};
+  S.terrain[dk].comment = String(val || '').substring(0, 4000);
+  clearTimeout(_cmTimer);
+  _cmTimer = setTimeout(saveState, 600);
+}
+
 function setObs(i,val){
   val = String(val||'').substring(0, 2000); // Max 2000 chars
   initDomainData(i);
@@ -2656,8 +2665,13 @@ function generatePDF(){
 }
 
 // Un thème a du contenu s'il a au moins un état, une criticité, une observation ou une photo
+function equipHasContent(eq){
+  if(!eq) return false;
+  return !!(eq.etat || eq.crit || (eq.obs && String(eq.obs).trim()) || (eq.photos && eq.photos.some(function(p){ return p; })));
+}
 function domainHasContent(dData){
   if(!dData) return false;
+  if(dData.comment && String(dData.comment).trim()) return true;
   return Object.values(dData.equips||{}).some(function(eq){
     if(!eq) return false;
     return !!(eq.etat || eq.crit || (eq.obs && String(eq.obs).trim()) || (eq.photos && eq.photos.some(function(p){ return p; })));
@@ -3169,12 +3183,13 @@ function buildPDF(){
     var rows=[];
     getDomainEquipList(dom).forEach(function(eq,i){
       var ev=dData.equips&&dData.equips[i]?dData.equips[i]:{};
+      if(!equipHasContent(ev)) return; // ligne sans notation, remarque ni photo : non imprimée
       var etatTxt=ev.etat===1?'Bon':ev.etat===2?'Moyen':ev.etat===3?'Mauvais':'--';
       var critTxt=ev.crit===1?'1 - Sans':ev.crit===2?'2 - Moyen':ev.crit===3?'3 - Fort':'--';
       rows.push([eq.n,etatTxt,critTxt,ev.obs||'']);
     });
 
-    doc.autoTable({startY:dy,margin:{left:ML,right:MR},
+    if(rows.length) doc.autoTable({startY:dy,margin:{left:ML,right:MR},
       head:[['Equipement','Etat','Criticite','Observations']],body:rows,theme:'grid',
       headStyles:{fillColor:CORA,textColor:[255,255,255],fontStyle:'bold',fontSize:8,cellPadding:3},
       columnStyles:{0:{cellWidth:62,fontSize:8,fontStyle:'bold'},1:{cellWidth:20,fontSize:8,halign:'center'},
@@ -3197,7 +3212,21 @@ function buildPDF(){
       }
     });
 
-    var photoY=doc.lastAutoTable.finalY+8;
+    var photoY=(rows.length?doc.lastAutoTable.finalY:dy)+8;
+    // Commentaire général du thème
+    var cmTxt=(dData.comment||'').trim();
+    if(cmTxt){
+      var cmLines=doc.splitTextToSize(pdfTxt(cmTxt),CW-10);
+      var cmH=cmLines.length*4+12;
+      if(photoY+cmH>H-25){pdfFooter(doc,CORA,ML,MR,H,W);doc.addPage();pdfHeader(doc,dom.name+' (suite)',CORA,W,ML,MR);photoY=MT+28;}
+      doc.setFillColor(249,247,244);doc.roundedRect(ML,photoY,CW,cmH,2,2,'F');
+      doc.setDrawColor(232,101,10);doc.setLineWidth(0.4);doc.line(ML,photoY,ML,photoY+cmH);doc.setLineWidth(0.1);
+      doc.setTextColor(232,101,10);doc.setFontSize(8);doc.setFont('helvetica','bold');
+      doc.text('COMMENTAIRE',ML+5,photoY+6);
+      doc.setTextColor(60,60,60);doc.setFontSize(8);doc.setFont('helvetica','normal');
+      doc.text(cmLines,ML+5,photoY+11);
+      photoY+=cmH+8;
+    }
     var photos=[];
     getDomainEquipList(dom).forEach(function(eq,i){
       var ev=dData.equips&&dData.equips[i]?dData.equips[i]:{};
@@ -3841,10 +3870,21 @@ function buildExcelFormatted(){
       };
       r++;
     });
+    if(d_data.comment){
+      r++;
+      ws_d[XLSX.utils.encode_cell({r:r,c:0})]={
+        v:'COMMENTAIRE : '+d_data.comment,
+        s:{font:font_s(false,'181816',9),fill:fill_s('FEF5EF'),alignment:align_s('left','top',true),border:bord_bot('FAC9A4')}
+      };
+      for(let c=1;c<4;c++) ws_d[XLSX.utils.encode_cell({r:r,c:c})]={v:'',s:{fill:fill_s('FEF5EF'),border:bord_bot('FAC9A4')}};
+      ws_d['!merges_cm']=r;
+      r++;
+    }
 
     ws_d['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:r+2,c:4}});
     ws_d['!cols']=[{wch:34},{wch:13},{wch:22},{wch:48}];
     ws_d['!merges']=[{s:{r:1,c:0},e:{r:1,c:4}},{s:{r:2,c:0},e:{r:2,c:4}}];
+    if(ws_d['!merges_cm']!==undefined){ ws_d['!merges'].push({s:{r:ws_d['!merges_cm'],c:0},e:{r:ws_d['!merges_cm'],c:3}}); delete ws_d['!merges_cm']; }
     const shName=dom.name.replace(/[\/:?*[\]]/g,'').substring(0,28);
     wb.SheetNames.push(shName); wb.Sheets[shName]=ws_d;
   });
@@ -3978,7 +4018,7 @@ function buildTransferPayload(includePhotos){
   Object.entries(S.terrain).forEach(function(entry){
     var did = entry[0], domain = entry[1];
     if(!domain) return;
-    payload.tr[did] = { loc: domain.loc || '', eq: {} };
+    payload.tr[did] = { loc: domain.loc || '', cm: domain.comment || '', eq: {} };
     Object.entries(domain.equips || {}).forEach(function(eEntry){
       var eid = eEntry[0], eq = eEntry[1];
       if(!eq) return;
@@ -4162,7 +4202,7 @@ function importTransferCode(){
     S.terrain = {};
     Object.entries(data.tr || {}).forEach(function(entry){
       var did = entry[0], d = entry[1];
-      S.terrain[did] = { loc: d.loc || '', equips: {} };
+      S.terrain[did] = { loc: d.loc || '', comment: d.cm || '', equips: {} };
       Object.entries(d.eq || {}).forEach(function(eEntry){
         var eid = eEntry[0], eq = eEntry[1];
         S.terrain[did].equips[eid] = { etat: eq.e, crit: eq.c, obs: eq.o || '', photos: [] };
@@ -4233,6 +4273,7 @@ function exportSession(){
   Object.entries(S.terrain).forEach(function([did, domain]){
     exportData.terrain[did] = {
       loc: domain.loc,
+      comment: domain.comment || '',
       equips: {}
     };
     Object.entries(domain.equips || {}).forEach(function([eid, eq]){
@@ -4702,7 +4743,7 @@ function parseExcelWorkbook(wb){
     if(!ws) return;
     const range = getRange(ws);
     const maxRow = range.e.r + 1;
-    let headerFound = false, sheetLoc = '';
+    let headerFound = false, sheetLoc = '', sheetComment = '';
     const domCount = {};
 
     for(let r = 0; r < maxRow; r++){
@@ -4711,6 +4752,10 @@ function parseExcelWorkbook(wb){
 
       if(v0.toUpperCase().includes('LOCALISATION')){
         sheetLoc = v0.replace(/^LOCALISATION\s*:\s*/i,'').trim();
+        continue;
+      }
+      if(/^COMMENTAIRE\s*:/i.test(v0)){
+        sheetComment = v0.replace(/^COMMENTAIRE\s*:\s*/i,'').trim();
         continue;
       }
       if(v1.toLowerCase().includes('état') || v1.toLowerCase() === 'etat'){ headerFound = true; continue; }
@@ -4744,6 +4789,7 @@ function parseExcelWorkbook(wb){
     // Localisation de la feuille -> thème le plus représenté
     const mainDom = Object.keys(domCount).sort(function(a,b){ return domCount[b]-domCount[a]; })[0];
     if(sheetLoc && mainDom && result.terrain[mainDom] && !result.terrain[mainDom].loc) result.terrain[mainDom].loc = sheetLoc;
+    if(sheetComment && mainDom && result.terrain[mainDom]) result.terrain[mainDom].comment = sheetComment;
   });
 
   // --- Feuille HSE ---
@@ -5019,6 +5065,11 @@ function buildTerrainPage(domIdx){
     const sv = saved.equips && saved.equips[i] ? saved.equips[i] : {};
     html += buildEquipHTML(eq, i, sv);
   });
+  // Commentaire général du thème
+  html += '<div class="equip-wrap">'
+    + '<div class="equip-head"><span>💬 Commentaire général — ' + esc(d.name) + '</span><span style="font-size:11px;color:var(--text3);font-weight:400">Repris dans le rapport PDF</span></div>'
+    + '<div class="equip-body"><textarea style="min-height:90px" placeholder="Commentaire sur l\'ensemble du thème…" oninput="setDomainComment(' + domIdx + ',this.value)">' + esc(saved.comment || '') + '</textarea></div>'
+    + '</div>';
   container.innerHTML = html;
   
   // Load photo thumbnails
@@ -5661,6 +5712,9 @@ function confirmMerge(){
     var myDomain = S.terrain[did];
     // Merge loc if empty
     if(!myDomain.loc && theirDomain.loc) myDomain.loc = theirDomain.loc;
+    if(theirDomain.comment && theirDomain.comment !== myDomain.comment){
+      myDomain.comment = myDomain.comment ? myDomain.comment + '\n' + theirDomain.comment : theirDomain.comment;
+    }
     // Merge equips
     if(!myDomain.equips) myDomain.equips = {};
     Object.entries(theirDomain.equips||{}).forEach(function([eid, theirEq]){
@@ -6396,7 +6450,7 @@ function importCloudData(data){
     Object.entries(data.tr || {}).forEach(function(entry){
       var dId = entry[0], dData = entry[1];
       if(!dData) return;
-      nt[dId] = {loc: dData.loc || '', equips: {}};
+      nt[dId] = {loc: dData.loc || '', comment: dData.cm || '', equips: {}};
       Object.entries(dData.eq || {}).forEach(function(eEntry){
         var eId = eEntry[0], eq = eEntry[1];
         if(!eq) return;
@@ -6520,7 +6574,7 @@ function showSyncDiag(){
   h += '<div style="background:#f5f5f5;border-radius:8px;padding:10px;font-size:12px;line-height:1.7;margin-bottom:10px">';
   h += '<b>Compte :</b> ' + (_fbUser ? esc(_fbUser.email) : '❌ non connecté') + '<br>';
   h += '<b>Cet appareil :</b> ' + esc(loc.site) + ' — ' + loc.eq + ' équipements, ' + loc.ph + ' photos<br>';
-  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-8';
+  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-9';
   h += '</div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   h += '<button onclick="diagForcePush()" style="' + btn + 'background:#388e3c">📤 Envoyer cet appareil vers le cloud</button>';
