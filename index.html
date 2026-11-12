@@ -1452,13 +1452,13 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 
         <div class="group-label">Note de risque HSE — Équipements de sécurité</div>
         <div class="card">
-          <div class="card-head"><span class="card-head-icon">🛡️</span> Risque sécurité — incendie, sûreté, sécurisation des personnes · indépendant de la note technique</div>
+          <div class="card-head"><span class="card-head-icon">🛡️</span> Risque sécurité — équipements marqués HSE · indépendant de la note technique</div>
           <div style="padding:16px 18px">
             <div class="hse-note-wrap">
               <div class="hse-note-badge hse-none" id="hse-note-badge">—</div>
               <div class="hse-note-info">
                 <div class="hse-note-label" id="hse-note-label">Non évalué</div>
-                <div class="hse-note-sub" id="hse-note-sub">Notez au moins un équipement en Sécurité incendie, Sûreté ou Sécurisation des personnes.</div>
+                <div class="hse-note-sub" id="hse-note-sub">Notez au moins un équipement marqué HSE.</div>
               </div>
             </div>
             <div class="hse-scale">
@@ -1469,7 +1469,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
               <div class="hse-scale-item hse-E" id="hse-sc-E">E</div>
             </div>
             <div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.5">
-              Formule : risque = état × 0,6 + criticité × 0,4 (domaines Sécurité incendie, Sûreté, Sécurisation des personnes). A = risque faible · E = risque critique.
+              Formule : risque = état × 0,6 + criticité × 0,4 (équipements marqués HSE, tous thèmes confondus). A = risque faible · E = risque critique.
             </div>
           </div>
         </div>
@@ -1574,15 +1574,15 @@ const DOMAINS = [
     {n:"Stores et protections solaires", hint:"Motorisation, état"}
   ]},
   {id:1, name:"Électricité courant fort", short:"Courant fort", icon:"⚡", equips:[
-    {n:"Poste de livraison / transformateur", hint:"Sec, huile, puissance, nombre"},
-    {n:"TGBT et tableaux divisionnaires", hint:"TGBT, tableaux divisionnaires, protections"},
+    {n:"Poste de livraison / transformateur", hint:"Sec, huile, puissance, nombre", hse:true},
+    {n:"TGBT et tableaux divisionnaires", hint:"TGBT, tableaux divisionnaires, protections", hse:true},
     {n:"Comptage / télérelève", hint:"Présence, fonctionnement"},
-    {n:"Groupe électrogène et cuve fioul", hint:"Puissance, essais, autonomie, rétention de la cuve"},
+    {n:"Groupe électrogène et cuve fioul", hint:"Puissance, essais, autonomie, rétention de la cuve", hse:true},
     {n:"Onduleur", hint:"Puissance, autonomie"},
     {n:"Éclairage intérieur des parties communes", hint:"LED, fluorescent, commande"},
     {n:"Éclairage extérieur", hint:"Type, commande, vétusté"},
-    {n:"Protection foudre", hint:"Nombre, emplacements"},
-    {n:"Photovoltaïque", hint:"Puissance crête, état, production"}
+    {n:"Protection foudre", hint:"Nombre, emplacements", hse:true},
+    {n:"Photovoltaïque", hint:"Puissance crête, état, production", hse:true}
   ]},
   {id:2, name:"Réseaux et télécom", short:"Réseaux / télécom", icon:"🌐", equips:[
     {n:"Arrivées opérateurs / fibre", hint:"Opérateurs présents, point de raccordement, fibre"},
@@ -1592,100 +1592,100 @@ const DOMAINS = [
     {n:"Téléphonie", hint:"Autocom, DECT, lignes analogiques"}
   ]},
   {id:3, name:"CVC", short:"CVC", icon:"🌡️", equips:[
-    {n:"Production chaud", hint:"Chaudière(s) — nombre, puissance, combustible"},
+    {n:"Production chaud", hint:"Chaudière(s) — nombre, puissance, combustible", hse:true},
     {n:"Distribution chaud", hint:"Pompes, réseau, isolations"},
     {n:"Émission chaud", hint:"Radiateurs, ventilo-convecteurs, plancher"},
-    {n:"Production froid / climatisation", hint:"Groupes froids — nombre, puissance"},
+    {n:"Production froid / climatisation", hint:"Groupes froids — nombre, puissance", hse:true},
     {n:"Distribution froid", hint:"Pompes, réseau frigorifique"},
     {n:"Émission froid", hint:"CTA, ventilo-convecteurs, split"},
-    {n:"Ventilation / CTA", hint:"Centrales de traitement d'air"},
-    {n:"VMC", hint:"Mécanique, naturelle, hybride"},
+    {n:"Ventilation / CTA", hint:"Centrales de traitement d'air", hse:true},
+    {n:"VMC", hint:"Mécanique, naturelle, hybride", hse:true},
     {n:"GTB / GTC / Régulations", hint:"Marque, version, couverture"}
   ]},
   {id:4, name:"Appareils élévateurs", short:"Élévateurs", icon:"🛗", equips:[
-    {n:"Ascenseur(s) électrique(s)", hint:"Nombre, marque, capacité, dernier contrôle"},
-    {n:"Ascenseur(s) hydraulique(s)", hint:"Nombre, marque, capacité"},
-    {n:"Monte-charge", hint:"Nombre, capacité, usage"},
-    {n:"Plateformes élévatrices PMR", hint:"Nombre, emplacement"},
-    {n:"Nacelle PEMP", hint:"Type, stockage, entretien"}
+    {n:"Ascenseur(s) électrique(s)", hint:"Nombre, marque, capacité, dernier contrôle", hse:true},
+    {n:"Ascenseur(s) hydraulique(s)", hint:"Nombre, marque, capacité", hse:true},
+    {n:"Monte-charge", hint:"Nombre, capacité, usage", hse:true},
+    {n:"Plateformes élévatrices PMR", hint:"Nombre, emplacement", hse:true},
+    {n:"Nacelle PEMP", hint:"Type, stockage, entretien", hse:true}
   ]},
   {id:5, name:"Plomberie", short:"Plomberie", icon:"🔧", equips:[
     {n:"Sanitaires WC", hint:"État général, ventilation, robinetterie"},
-    {n:"ECS — production et prévention légionelle", hint:"Individuelle ou collective, âge, capacité, suivi légionelle"},
-    {n:"Disconnecteur", hint:"Présence, état, contrôle périodique"},
+    {n:"ECS — production et prévention légionelle", hint:"Individuelle ou collective, âge, capacité, suivi légionelle", hse:true},
+    {n:"Disconnecteur", hint:"Présence, état, contrôle périodique", hse:true},
     {n:"Réseaux EU / EP intérieurs", hint:"Évacuations, regards, séparatif/unitaire"},
     {n:"Surpresseur", hint:"Puissance, état, pression"},
-    {n:"Qualité de l'eau", hint:"Analyses, traitement, rapport"}
+    {n:"Qualité de l'eau", hint:"Analyses, traitement, rapport", hse:true}
   ]},
   {id:6, name:"Sécurité incendie", short:"Sécu. incendie", icon:"🔥", equips:[
-    {n:"Accès services de secours", hint:"Voie publique, voie engin, voie échelle dédiée"},
-    {n:"Accessibilité façade", hint:"Accessibilité des façades aux véhicules de secours"},
-    {n:"Baies pompiers", hint:"Préciser les façades concernées"},
-    {n:"SSI / Centrale incendie", hint:"Catégorie A/B/C, date installation"},
-    {n:"Tableau répétiteur d'alarme", hint:"Emplacement, état"},
-    {n:"Déclencheurs manuels", hint:"Emplacements, état"},
-    {n:"Détection automatique incendie", hint:"Couverture, localisation (bureaux, locaux techniques…)"},
-    {n:"Indicateurs d'action", hint:"Présence, état"},
-    {n:"Désenfumage naturel", hint:"Zones (plateaux, escaliers…), ouvrants, câblage"},
-    {n:"Désenfumage mécanique", hint:"Zones (plateaux, escaliers…), ventilateurs, conduits"},
-    {n:"Bouche d'incendie privée", hint:"Nombre — si privées, à contrôler"},
-    {n:"Poteaux d'incendie privés", hint:"Nombre — si privés, à contrôler"},
-    {n:"Extinction automatique (sprinkler)", hint:"Type (eau, gaz, poudre), zones couvertes — y compris parking"},
-    {n:"Colonnes sèches / en charge", hint:"Nombre, emplacements, super ou infrastructure — y compris parking"},
-    {n:"RIA — Robinets incendie armés", hint:"Zones ou niveaux concernés"},
-    {n:"Extincteurs", hint:"Nombre, type, date vérification — y compris parking"},
-    {n:"Éclairage de sécurité BAES", hint:"BAES haut/bas, source centrale — y compris parking"},
-    {n:"Déverrouillage des issues", hint:"Type, fonctionnement"},
-    {n:"Isolement coupe-feu", hint:"Portes CF, clapets, compartimentage — y compris parking"},
-    {n:"Plans intervention / évacuation", hint:"Présence, mise à jour"},
-    {n:"Poste de sécurité", hint:"Nombre d'agents, qualifications SSIAP, plages horaires"},
-    {n:"Registre de sécurité", hint:"Consulté, mise à jour"}
+    {n:"Accès services de secours", hint:"Voie publique, voie engin, voie échelle dédiée", hse:true},
+    {n:"Accessibilité façade", hint:"Accessibilité des façades aux véhicules de secours", hse:true},
+    {n:"Baies pompiers", hint:"Préciser les façades concernées", hse:true},
+    {n:"SSI / Centrale incendie", hint:"Catégorie A/B/C, date installation", hse:true},
+    {n:"Tableau répétiteur d'alarme", hint:"Emplacement, état", hse:true},
+    {n:"Déclencheurs manuels", hint:"Emplacements, état", hse:true},
+    {n:"Détection automatique incendie", hint:"Couverture, localisation (bureaux, locaux techniques…)", hse:true},
+    {n:"Indicateurs d'action", hint:"Présence, état", hse:true},
+    {n:"Désenfumage naturel", hint:"Zones (plateaux, escaliers…), ouvrants, câblage", hse:true},
+    {n:"Désenfumage mécanique", hint:"Zones (plateaux, escaliers…), ventilateurs, conduits", hse:true},
+    {n:"Bouche d'incendie privée", hint:"Nombre — si privées, à contrôler", hse:true},
+    {n:"Poteaux d'incendie privés", hint:"Nombre — si privés, à contrôler", hse:true},
+    {n:"Extinction automatique (sprinkler)", hint:"Type (eau, gaz, poudre), zones couvertes — y compris parking", hse:true},
+    {n:"Colonnes sèches / en charge", hint:"Nombre, emplacements, super ou infrastructure — y compris parking", hse:true},
+    {n:"RIA — Robinets incendie armés", hint:"Zones ou niveaux concernés", hse:true},
+    {n:"Extincteurs", hint:"Nombre, type, date vérification — y compris parking", hse:true},
+    {n:"Éclairage de sécurité BAES", hint:"BAES haut/bas, source centrale — y compris parking", hse:true},
+    {n:"Déverrouillage des issues", hint:"Type, fonctionnement", hse:true},
+    {n:"Isolement coupe-feu", hint:"Portes CF, clapets, compartimentage — y compris parking", hse:true},
+    {n:"Plans intervention / évacuation", hint:"Présence, mise à jour", hse:true},
+    {n:"Poste de sécurité", hint:"Nombre d'agents, qualifications SSIAP, plages horaires", hse:true},
+    {n:"Registre de sécurité", hint:"Consulté, mise à jour", hse:true}
   ]},
   {id:7, name:"Parties communes", short:"Parties communes", icon:"🏢", equips:[
     {n:"Faux plafonds", hint:"Nature, état, accès"},
     {n:"Revêtements sol", hint:"Nature, état, glissance"},
     {n:"Peintures", hint:"État, dernière intervention"},
     {n:"Serrurerie", hint:"Portes palières, issues secours"},
-    {n:"Portes automatiques", hint:"Coulissantes, pivotantes — contrôle"}
+    {n:"Portes automatiques", hint:"Coulissantes, pivotantes — contrôle", hse:true}
   ]},
   {id:8, name:"Espaces extérieurs et VRD", short:"Espaces ext. / VRD", icon:"🌿", equips:[
     {n:"Espaces verts", hint:"Surface, entretien, arrosage"},
     {n:"Arrosage automatique", hint:"Programmateur, réseau, électrovannes"},
     {n:"Voirie et cheminements", hint:"Enrobé, pavés, état, cheminements piétons"},
-    {n:"Réseau EP et séparateur d'hydrocarbures", hint:"Regards, noues, séparateur d'hydrocarbures (entretien)"},
-    {n:"Clôtures, portails et barrières", hint:"Nature, état, motorisation, verrouillage"},
+    {n:"Réseau EP et séparateur d'hydrocarbures", hint:"Regards, noues, séparateur d'hydrocarbures (entretien)", hse:true},
+    {n:"Clôtures, portails et barrières", hint:"Nature, état, motorisation, verrouillage", hse:true},
     {n:"Signalétique extérieure", hint:"Marquage sol, panneaux, état"},
     {n:"Mobilier extérieur", hint:"Bancs, poubelles, abris"}
   ]},
   null, // id 9 libre (thème fusionné)
   {id:10, name:"Sûreté / Contrôle d'accès", short:"Sûreté", icon:"🔐", equips:[
-    {n:"Contrôle d'accès", hint:"Badges, lecteurs, centrale"},
-    {n:"Interphonie / vidéophonie", hint:"Platines, combinés, état — y compris accessibilité PMR"},
-    {n:"Vidéosurveillance", hint:"Caméras, enregistreur, écrans de contrôle"},
-    {n:"Anti-intrusion", hint:"Alarme, détecteurs, centrale"},
+    {n:"Contrôle d'accès", hint:"Badges, lecteurs, centrale", hse:true},
+    {n:"Interphonie / vidéophonie", hint:"Platines, combinés, état — y compris accessibilité PMR", hse:true},
+    {n:"Vidéosurveillance", hint:"Caméras, enregistreur, écrans de contrôle", hse:true},
+    {n:"Anti-intrusion", hint:"Alarme, détecteurs, centrale", hse:true},
     {n:"Télésurveillance / report d'alarmes", hint:"Prestataire, transmission, levée de doute"}
   ]},
   null, // id 11 libre (thème fusionné)
   null, // id 12 libre (thème fusionné)
   {id:13, name:"Parking", short:"Parking", icon:"🅿️", equips:[
-    {n:"Accès (portes, barrières)", hint:"Portes, barrières, télécommandes, contrôle d'accès véhicules"},
-    {n:"Ventilation et désenfumage du parc", hint:"Ventilateurs, détection CO/NO, désenfumage naturel ou mécanique"},
-    {n:"Bac à sable", hint:"Emplacement"},
+    {n:"Accès (portes, barrières)", hint:"Portes, barrières, télécommandes, contrôle d'accès véhicules", hse:true},
+    {n:"Ventilation et désenfumage du parc", hint:"Ventilateurs, détection CO/NO, désenfumage naturel ou mécanique", hse:true},
+    {n:"Bac à sable", hint:"Emplacement", hse:true},
     {n:"Éclairage et marquage", hint:"Éclairage du parc, marquage au sol, signalétique"},
-    {n:"Bornes de recharge IRVE", hint:"Nombre de points de charge, puissance, pré-équipement"}
+    {n:"Bornes de recharge IRVE", hint:"Nombre de points de charge, puissance, pré-équipement", hse:true}
   ]},
   {id:14, name:"Sécurisation des personnes", short:"Sécu. personnes", icon:"🔒", equips:[
-    {n:"Garde-corps", hint:"Emplacements, conformité"},
-    {n:"Lignes de vie", hint:"Toiture, façade"},
-    {n:"Points d'ancrage", hint:"Nombre, emplacements"},
-    {n:"Échelles et accès toiture", hint:"Échelles à crinoline, trappes, accès sécurisé à la toiture"}
+    {n:"Garde-corps", hint:"Emplacements, conformité", hse:true},
+    {n:"Lignes de vie", hint:"Toiture, façade", hse:true},
+    {n:"Points d'ancrage", hint:"Nombre, emplacements", hse:true},
+    {n:"Échelles et accès toiture", hint:"Échelles à crinoline, trappes, accès sécurisé à la toiture", hse:true}
   ]},
   {id:15, name:"Accessibilité PMR", short:"Accessibilité PMR", icon:"♿", equips:[
     {n:"Cheminements et rampes", hint:"Rampes, cheminements extérieurs et intérieurs, ressauts"},
-    {n:"Sanitaires PMR", hint:"Nombre ou niveaux concernés"},
-    {n:"Flashs lumineux d'alarme", hint:"Couverture"},
-    {n:"Espaces d'attente sécurisés (EAS)", hint:"Préciser configuration"},
-    {n:"Bandes d'éveil et contrastes", hint:"Bandes d'éveil de vigilance, contrastes des nez de marches"}
+    {n:"Sanitaires PMR", hint:"Nombre ou niveaux concernés", hse:true},
+    {n:"Flashs lumineux d'alarme", hint:"Couverture", hse:true},
+    {n:"Espaces d'attente sécurisés (EAS)", hint:"Préciser configuration", hse:true},
+    {n:"Bandes d'éveil et contrastes", hint:"Bandes d'éveil de vigilance, contrastes des nez de marches", hse:true}
   ]},
 ];
 // Ordre d'affichage des thèmes (pages terrain, rapports)
@@ -2443,17 +2443,23 @@ function upgradeAuditParts(terrain, capex, tv){
   return {terrain: migrateTerrainV1(terrain || {}), capex: migrateCapexV1(capex), migrated: true};
 }
 
-const HSE_RISK_DOMAINS = [6, 10, 14];
+// Les équipements HSE sont marqués hse:true dans DOMAINS (choix validé le 12/11/2026)
+function isHSEEquip(domId, idx){
+  var d = DOMAINS[domId];
+  return !!(d && d.equips[idx] && d.equips[idx].hse);
+}
 // Thèmes dans l'ordre d'affichage
 function orderedDomains(){
   return TERRAIN_ORDER.map(function(id){ return DOMAINS[id]; }).filter(Boolean);
 }
 function calcHSEScore(){
   let total = 0, count = 0;
-  HSE_RISK_DOMAINS.forEach(function(did){
-    const dom = S.terrain[String(did)];
+  orderedDomains().forEach(function(d){
+    const dom = S.terrain[String(d.id)];
     if(!dom) return;
-    Object.values(dom.equips||{}).forEach(function(eq){
+    Object.entries(dom.equips||{}).forEach(function(entry){
+      const eq = entry[1];
+      if(!isHSEEquip(d.id, Number(entry[0]))) return;
       if(!eq || !eq.etat) return;
       // Risque = état (1=bon→faible risque, 3=mauvais→risque élevé) × 0.6 + criticité × 0.4
       const critRisk = eq.crit ? eq.crit : 1;          // défaut 1 si non renseigné
@@ -2484,7 +2490,7 @@ function buildActionList(terrain){
       var crit = eq.crit || 0;
       var prio = crit === 3 ? 1 : crit === 2 ? 2 : 3;
       list.push({
-        hse: HSE_RISK_DOMAINS.indexOf(dom.id) !== -1,
+        hse: isHSEEquip(dom.id, Number(eid)),
         domId: dom.id, domaine: dom.name, icon: dom.icon || '',
         equip: equipList[eid] ? equipList[eid].n : '—',
         loc: dData.loc || '', obs: eq.obs || '',
@@ -2502,7 +2508,7 @@ function buildActionList(terrain){
 }
 
 function getHSENote(pct){
-  if(pct === null) return {note:'—', lbl:'Non évalué', sub:"Notez au moins un équipement en Sécurité incendie, Sûreté ou Sécurisation des personnes.", cls:'hse-none'};
+  if(pct === null) return {note:'—', lbl:'Non évalué', sub:"Notez au moins un équipement marqué HSE.", cls:'hse-none'};
   if(pct <= 20)   return {note:'A', lbl:'Risque faible',      sub:'Les équipements de sécurité sont en bon état général.', cls:'hse-A'};
   if(pct <= 40)   return {note:'B', lbl:'Risque modéré',      sub:'Quelques points de vigilance à surveiller.', cls:'hse-B'};
   if(pct <= 60)   return {note:'C', lbl:'Risque significatif',sub:'Des actions correctives sont à planifier.', cls:'hse-C'};
@@ -5088,7 +5094,7 @@ function buildEquipHTML(eq, i, sv){
   var pcnt = (sv.photos||[]).filter(function(p){return p;}).length;
   var uid = S.currentDomain+'-'+i;
   return '<div class="equip-wrap">'
-    +'<div class="equip-head"><span>'+eq.n+'</span><span style="font-size:11px;color:var(--text3);font-weight:400">'+(eq.hint||'')+'</span></div>'
+    +'<div class="equip-head"><span>'+eq.n+(eq.hse?' <span title="Compte dans la note de risque HSE" style="display:inline-block;background:#1565c0;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:1px">HSE</span>':'')+'</span><span style="font-size:11px;color:var(--text3);font-weight:400">'+(eq.hint||'')+'</span></div>'
     +'<div class="equip-body">'
     +'<div class="equip-rating-row">'
     +'<div class="equip-rating-col"><div class="rating-title">État</div><div class="rate-group">'
@@ -6574,7 +6580,7 @@ function showSyncDiag(){
   h += '<div style="background:#f5f5f5;border-radius:8px;padding:10px;font-size:12px;line-height:1.7;margin-bottom:10px">';
   h += '<b>Compte :</b> ' + (_fbUser ? esc(_fbUser.email) : '❌ non connecté') + '<br>';
   h += '<b>Cet appareil :</b> ' + esc(loc.site) + ' — ' + loc.eq + ' équipements, ' + loc.ph + ' photos<br>';
-  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-9';
+  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-10';
   h += '</div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   h += '<button onclick="diagForcePush()" style="' + btn + 'background:#388e3c">📤 Envoyer cet appareil vers le cloud</button>';
