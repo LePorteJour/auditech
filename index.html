@@ -579,6 +579,12 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 .fb-auth-card .fb-error{background:var(--danger-bg);color:var(--danger);padding:8px 12px;border-radius:var(--rad-xs);font-size:12px;margin-bottom:12px;display:none;border:1px solid #F5C4B3}
 .fb-auth-card .fb-info{background:var(--info-bg);color:var(--info);padding:8px 12px;border-radius:var(--rad-xs);font-size:12px;margin-bottom:12px;display:none;border:1px solid #B3D4ED}
 
+/* Menu déroulant « audit ouvert » */
+.audit-select{flex:0 1 340px;min-width:0;margin:0 16px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--rad-sm);background:var(--surface2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;outline:none;text-overflow:ellipsis}
+.audit-select:focus{border-color:var(--accent)}
+.audit-select.mob{display:block;width:100%;margin:0 0 8px;background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff;font-size:14px}
+.audit-select option,.audit-select optgroup{color:#222;background:#fff}
+
 /* Cloud sync status in mobile drawer */
 .mob-cloud-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:12px;color:var(--text2);border-top:1px solid var(--border)}
 
@@ -594,6 +600,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
     <input class="mobile-auditor" type="text" id="mob-auditor" placeholder="Votre nom…" oninput="syncAuditor(this.value)">
     <button class="mob-sync-btn" onclick="openMobDrawer()" title="Menu" style="font-size:20px">☰</button>
   </div>
+  <select class="audit-select mob" id="audit-select-mob" onchange="onAuditSelect(this)" title="Changer d'audit"></select>
   <div class="mobile-progress"><div class="mobile-progress-fill" id="mob-progress" style="width:0%"></div></div>
   <div class="mobile-tabs">
     <div class="mobile-tab active" data-sec="admin" onclick="goToSection('admin')">🏛 Admin</div>
@@ -613,7 +620,9 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
     </div>
     <div id="mpanel-audit" class="mob-drawer-btns">
       <button class="mob-drawer-item" onclick="closeMobDrawer();newAudit()" style="border-color:#4caf50;background:#E0F5EC;color:#1a6e32;font-weight:600"><span class="di-icon">✨</span><span>Nouvel audit vierge</span></button>
-      <button class="mob-drawer-item blue" onclick="closeMobDrawer();openAuditHistory()"><span class="di-icon">📂</span><span>Historique des audits</span></button>
+      <button class="mob-drawer-item blue" onclick="closeMobDrawer();openAuditHistory()"><span class="di-icon">🗂</span><span>Mes audits</span></button>
+      <button class="mob-drawer-item" onclick="closeMobDrawer();saveAuditToFile()"><span class="di-icon">💾</span><span>Enregistrer sur l'appareil (fichier)</span></button>
+      <button class="mob-drawer-item" onclick="closeMobDrawer();openAuditFile()"><span class="di-icon">📂</span><span>Ouvrir un fichier d'audit</span></button>
       <div style="height:1px;background:var(--border);margin:4px 0"></div>
       <button class="mob-drawer-item" onclick="closeMobDrawer();generatePDF()" style="border-color:var(--accent);background:var(--accent-light);color:var(--accent)"><span class="di-icon">📄</span><span>Générer rapport PDF</span></button>
       <button class="mob-drawer-item" onclick="closeMobDrawer();generateExcel()" style="border-color:#1a6e32;background:#E0F5EC;color:#1a6e32"><span class="di-icon">📊</span><span>Exporter Excel</span></button>
@@ -793,7 +802,9 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
       <div id="spanel-audit">
         <div class="sync-btns">
           <button class="btn-sync" onclick="newAudit()" style="border-color:rgba(100,220,140,0.5);background:rgba(100,220,140,0.15);font-weight:600"><span class="sync-icon">✨</span><span>Nouvel audit vierge</span></button>
-          <button class="btn-sync" onclick="openAuditHistory()" style="border-color:rgba(100,160,255,0.4);background:rgba(100,160,255,0.1)"><span class="sync-icon">📂</span><span>Historique des audits</span></button>
+          <button class="btn-sync" onclick="openAuditHistory()" style="border-color:rgba(100,160,255,0.4);background:rgba(100,160,255,0.1)"><span class="sync-icon">🗂</span><span>Mes audits</span></button>
+          <button class="btn-sync" onclick="saveAuditToFile()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">💾</span><span>Enregistrer sur l'ordinateur</span></button>
+          <button class="btn-sync" onclick="openAuditFile()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">📂</span><span>Ouvrir un fichier d'audit</span></button>
           <button class="btn-sync" onclick="generatePDF()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">📄</span><span>Générer rapport PDF</span></button>
           <button class="btn-sync" onclick="generateExcel()" style="border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)"><span class="sync-icon">📊</span><span>Exporter Excel</span></button>
         </div>
@@ -821,6 +832,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
         <div class="page-title" id="main-title">Identification du site</div>
         <div class="page-badge" id="main-badge">Administration</div>
       </div>
+      <select class="audit-select" id="audit-select" onchange="onAuditSelect(this)" title="Changer d'audit"></select>
       <div style="display:flex;gap:6px">
         <button class="btn-pdf" onclick="generatePDF()">📄 Rapport PDF</button>
         <button class="btn-pdf" style="background:#1a6e32" onclick="generateExcel()">📊 Excel</button>
@@ -1819,6 +1831,7 @@ function saveState(){
   showToast();
   // Horodatage de la dernière modification locale (sert à arbitrer avec le cloud)
   setLocalLastMod(Date.now());
+  if(typeof renderAuditSelect === 'function') renderAuditSelect();
   // Push vers Firebase Cloud si connecté
   scheduleCloudPush();
 }
@@ -5860,190 +5873,447 @@ function getAuditSummary(){
   return { site: site, addr: addr, auditor: S.auditor || '', date: new Date().toISOString() };
 }
 
-function newAudit(){
-  // Demander confirmation si données existantes
-  var hasSomeData = S.auditor || (S.adminData && S.adminData['a-site']);
-  if(hasSomeData){
-    var siteName = (S.adminData && S.adminData['a-site']) || 'cet audit';
-    if(!confirm('Sauvegarder « ' + siteName + ' » dans l\'historique avant de créer un nouvel audit vierge ?')){
-      return;
-    }
-    // Archiver l'audit actuel
-    archiveCurrentAudit();
+// ============================================================
+// MES AUDITS — bibliothèque dans l'appareil (IndexedDB) + fichiers
+// Chaque audit a un identifiant stable. Changer d'audit range automatiquement
+// l'audit ouvert dans « Mes audits » : plus de question « Sauvegarder ? ».
+// ============================================================
+var _auditIdFresh = false;   // identifiant créé à ce lancement (aucun connu avant)
+
+function getCurrentAuditId(){
+  if(_currentAuditId) return _currentAuditId;
+  try{ _currentAuditId = localStorage.getItem('audittech_current_id') || null; }catch(e){}
+  if(!_currentAuditId){
+    _currentAuditId = generateAuditId();
+    _auditIdFresh = true;
+    try{ localStorage.setItem('audittech_current_id', _currentAuditId); }catch(e){}
   }
-  // Réinitialiser l'état
-  resetToBlankAudit();
-  showToastMsg('✨ Nouvel audit vierge créé');
+  return _currentAuditId;
+}
+function setCurrentAuditId(id){
+  if(!id) return;
+  _currentAuditId = id;
+  _auditIdFresh = false;
+  try{ localStorage.setItem('audittech_current_id', id); }catch(e){}
 }
 
-function archiveCurrentAudit(){
-  var summary = getAuditSummary();
-  var id = _currentAuditId || generateAuditId();
-  var payload = buildTransferPayload(true); // Inclure les photos
+// ---------- Stockage IndexedDB ----------
+var _libDb = null;
+function libOpen(){
+  if(_libDb) return Promise.resolve(_libDb);
+  return new Promise(function(res, rej){
+    if(!window.indexedDB){ rej(new Error("stockage de l'appareil indisponible")); return; }
+    var rq = indexedDB.open('audittech_lib', 1);
+    rq.onupgradeneeded = function(){
+      var db = rq.result;
+      if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta', {keyPath:'id'});
+      if(!db.objectStoreNames.contains('data')) db.createObjectStore('data', {keyPath:'id'});
+    };
+    rq.onsuccess = function(){ _libDb = rq.result; res(_libDb); };
+    rq.onerror = function(){ rej(rq.error || new Error('ouverture impossible')); };
+  });
+}
+function libReq(stores, mode, work){
+  return libOpen().then(function(db){
+    return new Promise(function(res, rej){
+      var tx = db.transaction(stores, mode), out;
+      try{ out = work(tx); }catch(e){ rej(e); return; }
+      tx.oncomplete = function(){ res((typeof IDBRequest !== 'undefined' && out instanceof IDBRequest) ? out.result : out); };
+      tx.onerror = function(){ rej(tx.error || new Error('erreur de stockage')); };
+      tx.onabort = function(){ rej(tx.error || new Error("stockage de l'appareil plein")); };
+    });
+  });
+}
+function libPut(meta, rec){
+  return libReq(['meta','data'], 'readwrite', function(tx){
+    tx.objectStore('data').put(rec);
+    tx.objectStore('meta').put(meta);
+  });
+}
+function libList(){ return libReq(['meta'], 'readonly', function(tx){ return tx.objectStore('meta').getAll(); }); }
+function libGet(id){ return libReq(['data'], 'readonly', function(tx){ return tx.objectStore('data').get(id); }); }
+function libGetMeta(id){ return libReq(['meta'], 'readonly', function(tx){ return tx.objectStore('meta').get(id); }); }
+function libDelete(id){
+  return libReq(['meta','data'], 'readwrite', function(tx){
+    tx.objectStore('data').delete(id);
+    tx.objectStore('meta').delete(id);
+  });
+}
+
+// ---------- Audit ouvert ----------
+function isAuditEmpty(){
+  if(S.adminData && S.adminData['a-site']) return false;
+  if(S.auditor) return false;
+  if(Object.values(S.adminData || {}).some(function(v){ return v && String(v).trim(); })) return false;
+  if(Object.values(S.terrain || {}).some(function(d){ return domainHasContent(d); })) return false;
+  if((S.counters||[]).length || (S.contracts||[]).length || (S.incidents||[]).length) return false;
+  return true;
+}
+function metaFromPayload(id, payload, when){
+  var ad = payload.ad || {};
+  return {id: id, site: ad['a-site'] || payload.site || '', addr: ad['a-address'] || '', auditor: payload.aud || '', updatedAt: when || Date.now()};
+}
+// Range l'audit ouvert dans « Mes audits » (photos comprises). Résout false s'il est vide.
+function saveCurrentToLibrary(){
+  if(isAuditEmpty()) return Promise.resolve(false);
+  var id = getCurrentAuditId();
+  var payload = buildTransferPayload(true);
+  payload._auditId = id;
   payload._archived = Date.now();
-  payload._summary = summary;
-
-  // Sauvegarder en local
+  return libPut(metaFromPayload(id, payload), {id: id, data: payload}).then(function(){
+    refreshAuditSelect();
+    return true;
+  });
+}
+// Vide l'état (sans enregistrer ni rafraîchir)
+function clearAuditState(){
+  S.adminData = {}; S.adminChips = {}; S.singleChips = {}; S.terrain = {};
+  S.auditor = ''; S.counters = []; S.contracts = []; S.incidents = [];
+  S.capex = {}; S.registre = {}; S.tv = TERRAIN_VERSION; S.coverPhoto = null;
+  S.currentDomain = 0; S.currentLoc = '';
   try{
-    var history = JSON.parse(localStorage.getItem('audittech_history') || '[]');
-    // Vérifier si déjà archivé (même id) — remplacer
-    var idx = history.findIndex(function(h){ return h.id === id; });
-    var entry = { id: id, summary: summary, data: payload };
-    if(idx >= 0){ history[idx] = entry; } else { history.unshift(entry); }
-    // Garder max 20 audits
-    if(history.length > 20) history = history.slice(0, 20);
-    localStorage.setItem('audittech_history', JSON.stringify(history));
-  }catch(e){ console.warn('archiveCurrentAudit local error:', e); }
-
-  // Sauvegarder dans Firebase si connecté
-  if(_fbUser && _fbDb){
-    try{
-      _fbDb.ref('users/' + _fbUser.uid + '/history/' + id).set({
-        summary: summary,
-        data: payload
-      }).catch(function(err){ console.warn('archive cloud error:', err); });
-    }catch(e){}
+    for(var d = 0; d <= 15; d++) localStorage.removeItem('audittech_photos_' + d);
+    localStorage.removeItem('audittech_cover_photo');
+  }catch(e){}
+}
+// Remet tout l'écran en accord avec S
+function refreshAllUI(){
+  document.querySelectorAll('input[id^="a-"],textarea[id^="a-"],select[id^="a-"]').forEach(function(el){
+    if(el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+    else if(el.type !== 'file') el.value = '';
+  });
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active-green','active-blue','active-teal'); });
+  try{ loadAdmin(); }catch(e){}
+  ['desk-auditor','mob-auditor'].forEach(function(id){ var el = document.getElementById(id); if(el) el.value = S.auditor || ''; });
+  for(var d = 0; d <= 15; d++){ var c = document.getElementById('equip-container-' + d); if(c) c.innerHTML = ''; }
+  try{ renderCounters(); renderContracts(); renderIncidents(); }catch(e){}
+  try{ buildHSETable(); }catch(e){}
+  try{ showCoverPhoto(S.coverPhoto); }catch(e){}
+  try{ updateProgress(); }catch(e){}
+  try{ goToPage(_currentPage); }catch(e){}
+  refreshAuditSelect();
+}
+// Ouvre un audit (données au format charge utile) comme audit en cours
+function openAuditPayload(data, id){
+  clearAuditState();
+  setCurrentAuditId(id || data._auditId || generateAuditId());
+  importCloudData(data);                 // remplit S, enregistre dans l'appareil, rafraîchit l'écran
+  setCurrentAuditId(id || data._auditId || _currentAuditId);
+  setLocalLastMod(Date.now());
+  scheduleCloudPush();                   // le cloud suit l'audit ouvert
+}
+function sameSiteName(a, b){
+  var n = function(t){ return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim(); };
+  return !!n(a) && n(a) === n(b);
+}
+// Données reçues du cloud : si c'est un AUTRE audit, on range d'abord l'audit ouvert
+function adoptCloudAudit(data){
+  var incomingId = data._auditId || '';
+  var cur = getCurrentAuditId();
+  var incomingSite = (data.ad && data.ad['a-site']) || data.site || '';
+  if(!incomingId || incomingId === cur || (_auditIdFresh && (isAuditEmpty() || sameSiteName(incomingSite, S.adminData['a-site'])))){
+    if(incomingId) setCurrentAuditId(incomingId);
+    importCloudData(data);
+    return Promise.resolve(true);
   }
+  var curSite = S.adminData['a-site'] || "l'audit en cours";
+  return saveCurrentToLibrary().then(function(){
+    clearAuditState();
+    importCloudData(data);
+    setCurrentAuditId(incomingId);
+    syncLog('🔀 Audit « ' + (incomingSite || 'sans nom') + ' » ouvert depuis l\'autre appareil');
+    showToastMsg('🔀 « ' + (incomingSite || 'Audit sans nom') + ' » ouvert depuis l\'autre appareil — « ' + curSite + ' » est dans Mes audits');
+    return true;
+  }).catch(function(e){
+    syncLog('⚠️ Audit de l\'autre appareil non ouvert : rangement de « ' + curSite + ' » impossible (' + e.message + ')');
+    showToastMsg('⚠️ Rangement impossible — enregistrez « ' + curSite + ' » sur l\'ordinateur');
+    return false;
+  });
 }
 
+// ---------- Changer d'audit ----------
+function newAudit(){
+  var name = S.adminData['a-site'] || "l'audit en cours";
+  saveCurrentToLibrary().then(function(saved){
+    resetToBlankAudit();
+    showToastMsg(saved ? '✨ Nouvel audit — « ' + name + ' » est dans Mes audits' : '✨ Nouvel audit vierge créé');
+  }).catch(function(e){
+    if(confirm('Impossible de ranger « ' + name + ' » dans Mes audits (' + e.message + ').\n\nEnregistrez-le d\'abord sur l\'ordinateur (💾).\n\nCréer quand même un audit vierge et PERDRE « ' + name + ' » ?')){
+      resetToBlankAudit();
+    }
+  });
+}
 function resetToBlankAudit(){
-  _currentAuditId = generateAuditId();
-  // Vider tout l'état
-  S.adminData = {};
-  S.adminChips = {};
-  S.singleChips = {};
-  S.terrain = {};
-  S.auditor = '';
-  S.counters = [];
-  S.contracts = [];
-  S.incidents = [];
-  S.capex = {};
-  S.registre = {};
-  S.tv = TERRAIN_VERSION;
-  S.coverPhoto = null;
-  S.currentDomain = 0;
-  S.currentLoc = {};
-  // Vider les photos du localStorage
-  for(var d = 0; d <= 15; d++){
-    localStorage.removeItem('audittech_photos_' + d);
-  }
-  localStorage.removeItem('audittech_cover_photo');
-  // Sauvegarder l'état vierge
+  clearAuditState();
+  setCurrentAuditId(generateAuditId());
   saveState();
-  // Mettre à jour les champs affichés
-  var deskAud = document.getElementById('desk-auditor');
-  var mobAud = document.getElementById('mob-auditor');
-  if(deskAud) deskAud.value = '';
-  if(mobAud) mobAud.value = '';
-  // Revenir à la page 0
+  refreshAllUI();
   goToPage(0);
-  updateProgress();
+}
+function switchToAudit(id){
+  if(!id || id === getCurrentAuditId()) return;
+  saveCurrentToLibrary().then(function(){ return libGet(id); }).then(function(rec){
+    if(!rec || !rec.data){ showToastMsg('❌ Audit introuvable dans Mes audits'); return; }
+    openAuditPayload(rec.data, id);
+    showToastMsg('📂 « ' + ((rec.data.ad && rec.data.ad['a-site']) || 'Audit sans nom') + ' » ouvert');
+  }).catch(function(e){
+    showToastMsg('❌ Changement impossible : ' + e.message);
+  });
 }
 
+// ---------- Menu déroulant ----------
+var _libMetaCache = [];
+function fmtShortDate(t){ try{ return new Date(t).toLocaleDateString('fr-FR'); }catch(e){ return ''; } }
+function refreshAuditSelect(){
+  libList().then(function(list){ _libMetaCache = list || []; renderAuditSelect(); })
+           .catch(function(){ renderAuditSelect(); });
+}
+function renderAuditSelect(){
+  var cur = getCurrentAuditId();
+  var curName = (S.adminData && S.adminData['a-site']) || 'Audit sans nom';
+  var others = _libMetaCache.filter(function(m){ return m.id !== cur; }).sort(function(a, b){
+    return (a.site || '').localeCompare(b.site || '', 'fr') || (b.updatedAt - a.updatedAt);
+  });
+  var h = '<optgroup label="Audit ouvert"><option value="" selected>📍 ' + esc(curName) + '</option></optgroup>';
+  if(others.length){
+    h += '<optgroup label="Mes audits (' + others.length + ')">' + others.map(function(m){
+      return '<option value="open:' + esc(m.id) + '">' + esc(m.site || 'Audit sans nom') + ' · ' + fmtShortDate(m.updatedAt) + '</option>';
+    }).join('') + '</optgroup>';
+  }
+  h += '<optgroup label="Actions">'
+    + '<option value="new">＋ Nouvel audit vierge</option>'
+    + '<option value="file-save">💾 Enregistrer sur l\'ordinateur</option>'
+    + '<option value="file-open">📂 Ouvrir un fichier d\'audit…</option>'
+    + '<option value="manage">🗂 Gérer mes audits…</option>'
+    + '</optgroup>';
+  ['audit-select','audit-select-mob'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el && document.activeElement !== el) el.innerHTML = h;
+  });
+}
+function onAuditSelect(sel){
+  var v = sel.value;
+  sel.blur();
+  renderAuditSelect();
+  if(!v) return;
+  if(v === 'new') newAudit();
+  else if(v === 'file-save') saveAuditToFile();
+  else if(v === 'file-open') openAuditFile();
+  else if(v === 'manage') openAuditHistory();
+  else if(v.indexOf('open:') === 0) switchToAudit(v.slice(5));
+}
+
+// ---------- Fichiers ----------
+function auditFileName(site){
+  var slug = String(site || 'audit').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'').substring(0, 40) || 'audit';
+  var d = new Date(), pad = function(n){ return (n < 10 ? '0' : '') + n; };
+  return 'Audit_' + slug + '_' + d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + '.json';
+}
+function downloadJSONFile(obj, name){
+  var blob = new Blob([JSON.stringify(obj)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.style.cssText = 'position:fixed;top:-9999px';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  return blob.size;
+}
+function auditFileObject(id, payload){
+  return {format:'audittech-audit', fv:1, savedAt:new Date().toISOString(), id:id, site:(payload.ad && payload.ad['a-site']) || '', data:payload};
+}
+function saveAuditToFile(){
+  var id = getCurrentAuditId();
+  var payload = buildTransferPayload(true);
+  payload._auditId = id;
+  var site = S.adminData['a-site'] || 'audit';
+  var size = downloadJSONFile(auditFileObject(id, payload), auditFileName(site));
+  showToastMsg('💾 « ' + site + ' » enregistré (' + (size/1024/1024).toFixed(1) + ' Mo)');
+  saveCurrentToLibrary().catch(function(){});
+}
+function saveLibraryAuditToFile(id){
+  libGet(id).then(function(rec){
+    if(!rec || !rec.data){ showToastMsg('❌ Audit introuvable'); return; }
+    var site = (rec.data.ad && rec.data.ad['a-site']) || 'audit';
+    downloadJSONFile(auditFileObject(id, rec.data), auditFileName(site));
+    showToastMsg('💾 « ' + site + ' » enregistré');
+  }).catch(function(e){ showToastMsg('❌ ' + e.message); });
+}
+function openAuditFile(){
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.json,application/json';
+  inp.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
+  document.body.appendChild(inp);
+  inp.onchange = function(){
+    var f = inp.files && inp.files[0];
+    inp.remove();
+    if(!f) return;
+    var r = new FileReader();
+    r.onload = function(){ handleAuditFileText(String(r.result || '')); };
+    r.onerror = function(){ showToastMsg('❌ Lecture du fichier impossible'); };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+// Ancien export « JSON & mail » -> charge utile
+function legacyExportToPayload(o){
+  var tr = {};
+  Object.entries(o.terrain || {}).forEach(function(e){
+    var did = e[0], d = e[1] || {};
+    tr[did] = {loc: d.loc || '', cm: d.comment || '', eq: {}};
+    Object.entries(d.equips || {}).forEach(function(q){
+      var eq = q[1] || {};
+      tr[did].eq[q[0]] = {e: eq.etat || '', c: eq.crit || '', o: eq.obs || ''};
+    });
+  });
+  return {v:2, tv:o.tv, site:o.site || '', aud:o.auditor || '', ad:o.adminData || {}, ac:o.adminChips || {}, sc:o.singleChips || {},
+          ct:o.counters || [], co:o.contracts || [], inc:o.incidents || [], cx:o.capex || {}, rg:o.registre || {}, tr:tr};
+}
+function handleAuditFileText(txt){
+  var obj;
+  try{ obj = JSON.parse(txt); }catch(e){ showToastMsg('❌ Fichier illisible'); return; }
+  var payload, id;
+  if(obj && obj.format === 'audittech-audit' && obj.data){ payload = obj.data; id = obj.id || payload._auditId; }
+  else if(obj && obj.v && obj.tr){ payload = obj; id = obj._auditId; }
+  else if(obj && obj.terrain && (obj.adminData || obj.version)){ payload = legacyExportToPayload(obj); }
+  else { showToastMsg("❌ Ce fichier n'est pas un audit AuditTech"); return; }
+  id = id || generateAuditId();
+  var site = (payload.ad && payload.ad['a-site']) || 'Audit sans nom';
+  if(id === getCurrentAuditId()){
+    if(!confirm('Ce fichier contient l\'audit actuellement ouvert (« ' + site + ' »).\n\nRemplacer la version de l\'appli par celle du fichier ?')) return;
+    openAuditPayload(payload, id);
+    saveCurrentToLibrary().catch(function(){});
+    showToastMsg('📂 « ' + site + ' » rechargé depuis le fichier');
+    return;
+  }
+  libGetMeta(id).then(function(existing){
+    if(existing && !confirm('« ' + site + ' » existe déjà dans Mes audits (version du ' + fmtShortDate(existing.updatedAt) + ').\n\nLa remplacer par la version du fichier ?')) return null;
+    return saveCurrentToLibrary().then(function(){
+      openAuditPayload(payload, id);
+      return saveCurrentToLibrary();
+    }).then(function(){ showToastMsg('📂 « ' + site + ' » ouvert depuis le fichier'); });
+  }).catch(function(e){ showToastMsg('❌ Ouverture impossible : ' + e.message); });
+}
+
+// ---------- Fenêtre « Mes audits » ----------
 function openAuditHistory(){
-  // Charger l'historique local + cloud
   var modal = document.getElementById('history-modal');
   if(!modal) return;
   modal.classList.remove('hidden');
   renderHistoryList();
-
-  // Si connecté Firebase, synchroniser l'historique cloud
+  // Rapatrier dans l'appareil les audits archivés dans le cloud par l'ancienne version
   if(_fbUser && _fbDb){
     _fbDb.ref('users/' + _fbUser.uid + '/history').once('value').then(function(snap){
       var cloudHist = snap.val();
-      if(!cloudHist) return;
-      var localHist = JSON.parse(localStorage.getItem('audittech_history') || '[]');
-      var localIds = new Set(localHist.map(function(h){ return h.id; }));
-      // Ajouter les entrées cloud manquantes en local
-      var added = false;
-      Object.entries(cloudHist).forEach(function(entry){
-        var id = entry[0], val = entry[1];
-        if(!localIds.has(id)){
-          localHist.push({ id: id, summary: val.summary, data: val.data });
-          added = true;
-        }
-      });
-      if(added){
-        // Trier par date décroissante
-        localHist.sort(function(a,b){
-          var da = (a.data && a.data._archived) || 0;
-          var db = (b.data && b.data._archived) || 0;
-          return db - da;
+      _cloudHistCount = cloudHist ? Object.keys(cloudHist).length : 0;
+      if(!cloudHist){ renderHistoryList(); return; }
+      return libList().then(function(list){
+        var known = {}; (list || []).forEach(function(m){ known[m.id] = m; });
+        var jobs = [];
+        Object.entries(cloudHist).forEach(function(e){
+          var id = e[0], val = e[1];
+          if(!val || !val.data || known[id] || id === getCurrentAuditId()) return;
+          jobs.push(libPut(metaFromPayload(id, val.data, val.data._archived), {id: id, data: val.data}));
         });
-        localStorage.setItem('audittech_history', JSON.stringify(localHist));
-        renderHistoryList();
-      }
+        return Promise.all(jobs);
+      }).then(function(){ refreshAuditSelect(); renderHistoryList(); });
     }).catch(function(){});
   }
 }
-
-function closeHistory(){
-  document.getElementById('history-modal').classList.add('hidden');
-}
-
+var _cloudHistCount = 0;
+function closeHistory(){ document.getElementById('history-modal').classList.add('hidden'); }
 function renderHistoryList(){
   var list = document.getElementById('history-list');
   if(!list) return;
-  var history = [];
-  try{ history = JSON.parse(localStorage.getItem('audittech_history') || '[]'); }catch(e){}
-  if(!history.length){
-    list.innerHTML = '<div class="history-empty">Aucun audit archivé.<br>Vos anciens audits apparaîtront ici.</div>';
-    return;
-  }
-  list.innerHTML = history.map(function(h, i){
-    var s = h.summary || {};
-    var name = s.site || 'Audit sans nom';
-    var dateStr = '';
-    if(s.date){
-      try{ var d = new Date(s.date); dateStr = d.toLocaleDateString('fr-FR') + ' — ' + (s.auditor || ''); }catch(e){}
+  libList().then(function(metas){
+    _libMetaCache = metas || [];
+    var cur = getCurrentAuditId();
+    var curName = S.adminData['a-site'] || 'Audit sans nom';
+    var others = _libMetaCache.filter(function(m){ return m.id !== cur; }).sort(function(a, b){
+      return (a.site || '').localeCompare(b.site || '', 'fr') || (b.updatedAt - a.updatedAt);
+    });
+    var btn = 'border:1px solid var(--border);background:var(--surface);border-radius:6px;padding:6px 9px;cursor:pointer;font-size:13px;font-family:inherit';
+    var h = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'
+      + '<button style="' + btn + ';flex:1" onclick="saveAuditToFile()">💾 Enregistrer l\'audit ouvert</button>'
+      + '<button style="' + btn + ';flex:1" onclick="openAuditFile()">📂 Ouvrir un fichier</button>'
+      + '</div>';
+    h += '<div class="history-item" style="cursor:default;border-color:var(--accent)"><div class="hi-icon">📍</div><div class="hi-info"><div class="hi-name">' + esc(curName) + '</div><div class="hi-date">Audit ouvert</div></div></div>';
+    if(!others.length){
+      h += '<div class="history-empty">Aucun autre audit dans cet appareil.<br>Un audit y est rangé automatiquement quand vous en ouvrez un autre.</div>';
     }
-    return '<div class="history-item" onclick="restoreAudit(' + i + ')">' +
-      '<div class="hi-icon">🏢</div>' +
-      '<div class="hi-info">' +
-        '<div class="hi-name">' + esc(name) + '</div>' +
-        '<div class="hi-date">' + esc(dateStr) + '</div>' +
-      '</div>' +
-      '<button class="hi-del" onclick="event.stopPropagation();deleteHistoryItem(' + i + ')" title="Supprimer">🗑</button>' +
-    '</div>';
-  }).join('');
+    h += others.map(function(m){
+      return '<div class="history-item" onclick="closeHistory();switchToAudit(\'' + esc(m.id) + '\')">'
+        + '<div class="hi-icon">🏢</div>'
+        + '<div class="hi-info"><div class="hi-name">' + esc(m.site || 'Audit sans nom') + '</div>'
+        + '<div class="hi-date">' + esc(fmtShortDate(m.updatedAt) + (m.auditor ? ' — ' + m.auditor : '') + (m.addr ? ' · ' + m.addr : '')) + '</div></div>'
+        + '<button class="hi-del" style="margin-right:4px" onclick="event.stopPropagation();saveLibraryAuditToFile(\'' + esc(m.id) + '\')" title="Enregistrer sur l\'ordinateur">💾</button>'
+        + '<button class="hi-del" onclick="event.stopPropagation();deleteLibraryAudit(\'' + esc(m.id) + '\')" title="Supprimer de cet appareil">🗑</button>'
+        + '</div>';
+    }).join('');
+    if(_cloudHistCount > 0){
+      h += '<div style="margin-top:12px;padding:10px;border-radius:8px;background:var(--surface2);font-size:12px;line-height:1.5">☁️ ' + _cloudHistCount + ' ancien(s) archivage(s) restent dans le cloud. Ils sont déjà copiés dans cet appareil.'
+        + '<br><button style="' + btn + ';margin-top:6px" onclick="clearCloudHistory()">Supprimer ces archivages du cloud</button></div>';
+    }
+    if(navigator.storage && navigator.storage.estimate){
+      navigator.storage.estimate().then(function(est){
+        var el = document.getElementById('lib-usage');
+        if(el && est && est.usage !== undefined) el.textContent = 'Espace utilisé dans cet appareil : ' + (est.usage/1024/1024).toFixed(1) + ' Mo';
+      }).catch(function(){});
+    }
+    h += '<div id="lib-usage" style="font-size:11px;color:var(--text3);margin-top:10px;text-align:center"></div>';
+    list.innerHTML = h;
+  }).catch(function(e){
+    list.innerHTML = '<div class="history-empty">Stockage de l\'appareil indisponible (' + esc(e.message) + ').<br>Utilisez « Enregistrer sur l\'ordinateur ».</div>';
+  });
+}
+function deleteLibraryAudit(id){
+  var m = _libMetaCache.filter(function(x){ return x.id === id; })[0];
+  var name = (m && m.site) || 'cet audit';
+  if(!confirm('Supprimer « ' + name + ' » de cet appareil ?\n\nPensez à l\'enregistrer sur l\'ordinateur avant (💾) si vous voulez le garder.')) return;
+  libDelete(id).then(function(){
+    if(_fbUser && _fbDb) _fbDb.ref('users/' + _fbUser.uid + '/history/' + id).remove().catch(function(){});
+    refreshAuditSelect();
+    renderHistoryList();
+  }).catch(function(e){ showToastMsg('❌ ' + e.message); });
+}
+function clearCloudHistory(){
+  if(!_fbUser || !_fbDb) return;
+  if(!confirm('Supprimer du cloud les anciens archivages ?\n\nIls restent dans Mes audits sur cet appareil. Sur un autre appareil, ouvrez d\'abord « Mes audits » pour les y copier.')) return;
+  _fbDb.ref('users/' + _fbUser.uid + '/history').remove().then(function(){
+    _cloudHistCount = 0;
+    renderHistoryList();
+    showToastMsg('☁️ Cloud allégé');
+  }).catch(function(e){ showToastMsg('❌ ' + e.message); });
 }
 
-function restoreAudit(idx){
-  var history = [];
-  try{ history = JSON.parse(localStorage.getItem('audittech_history') || '[]'); }catch(e){}
-  if(!history[idx]) return;
-  var entry = history[idx];
-  var siteName = (entry.summary && entry.summary.site) || 'cet audit';
-  // Demander si on veut archiver l'audit en cours
-  var hasCurrent = S.auditor || (S.adminData && S.adminData['a-site']);
-  if(hasCurrent){
-    var currentName = (S.adminData && S.adminData['a-site']) || 'l\'audit en cours';
-    if(confirm('Sauvegarder « ' + currentName + ' » avant de restaurer « ' + siteName + ' » ?')){
-      archiveCurrentAudit();
-    }
-  }
-  // Restaurer
-  importCloudData(entry.data);
-  _currentAuditId = entry.id;
-  closeHistory();
-  showToastMsg('📂 Audit « ' + siteName + ' » restauré');
+// ---------- Démarrage : reprise de l'ancien historique + stockage durable ----------
+function migrateOldHistory(){
+  var raw = null;
+  try{ raw = localStorage.getItem('audittech_history'); }catch(e){}
+  if(!raw) return Promise.resolve();
+  var hist = [];
+  try{ hist = JSON.parse(raw) || []; }catch(e){ hist = []; }
+  var byId = {};
+  hist.forEach(function(h){
+    if(!h || !h.id || !h.data) return;
+    var t = h.data._archived || 0;
+    if(!byId[h.id] || (byId[h.id].data._archived || 0) < t) byId[h.id] = h;
+  });
+  var cur = getCurrentAuditId();
+  var jobs = Object.values(byId).filter(function(h){ return h.id !== cur; }).map(function(h){
+    return libPut(metaFromPayload(h.id, h.data, h.data._archived), {id: h.id, data: h.data});
+  });
+  return Promise.all(jobs).then(function(){
+    try{ localStorage.removeItem('audittech_history'); }catch(e){}
+  });
 }
-
-function deleteHistoryItem(idx){
-  var history = [];
-  try{ history = JSON.parse(localStorage.getItem('audittech_history') || '[]'); }catch(e){}
-  if(!history[idx]) return;
-  var entry = history[idx];
-  var name = (entry.summary && entry.summary.site) || 'cet audit';
-  if(!confirm('Supprimer « ' + name + ' » de l\'historique ?')) return;
-  // Supprimer de Firebase aussi
-  if(_fbUser && _fbDb && entry.id){
-    _fbDb.ref('users/' + _fbUser.uid + '/history/' + entry.id).remove().catch(function(){});
-  }
-  history.splice(idx, 1);
-  localStorage.setItem('audittech_history', JSON.stringify(history));
-  renderHistoryList();
-}
+window.addEventListener('load', function(){
+  getCurrentAuditId();
+  try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+  migrateOldHistory().catch(function(e){ console.warn('migration historique', e); }).then(refreshAuditSelect);
+});
 
 // ============================================================
 // FIREBASE CLOUD SYNC
@@ -6283,7 +6553,7 @@ function pushToCloud(){
       setLocalLastMod(payload._lastSync);
       payload._device = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
       payload._sessionId = _fbSessionId;
-      payload._auditId = _currentAuditId || '';
+      payload._auditId = getCurrentAuditId();
       // Vérifier la taille (limite Firebase ~10MB)
       var json = JSON.stringify(payload);
       syncLog('📤 Payload: ' + (json.length/1024).toFixed(0) + ' KB');
@@ -6360,9 +6630,16 @@ function initialCloudSync(){
       var cloudMod = cloud._lastSync || 0;
       syncLog('☁️ Cloud: ' + c.site + ', ' + c.eq + ' équip., ' + c.ph + ' photos, ' + new Date(cloudMod).toLocaleString());
       syncLog('📱 Local: ' + local.site + ', ' + local.eq + ' équip., ' + local.ph + ' photos, ' + (localMod ? new Date(localMod).toLocaleString() : 'date inconnue'));
-      if(local.empty){
+      var cloudSite = (cloud.ad && cloud.ad['a-site']) || '';
+      var otherAudit = cloud._auditId && cloud._auditId !== getCurrentAuditId()
+        && !(_auditIdFresh && (local.empty || sameSiteName(cloudSite, S.adminData['a-site'])));
+      if(!otherAudit && cloud._auditId) setCurrentAuditId(cloud._auditId);
+      if(otherAudit){
+        syncLog('→ Un autre audit est ouvert sur l\'autre appareil : on le récupère, celui-ci va dans Mes audits');
+        adoptCloudAudit(cloud);
+      } else if(local.empty){
         syncLog('→ Appareil vide : récupération du cloud');
-        importCloudData(cloud);
+        adoptCloudAudit(cloud);
       } else if(c.empty){
         syncLog('→ Cloud vide : envoi des données locales');
         pushToCloud();
@@ -6375,7 +6652,7 @@ function initialCloudSync(){
           'OK = récupérer la version CLOUD sur cet appareil\nAnnuler = envoyer la version de CET APPAREIL vers le cloud';
         if(confirm(msg)){
           syncLog('→ Choix : récupérer le cloud');
-          importCloudData(cloud);
+          adoptCloudAudit(cloud);
         } else {
           syncLog('→ Choix : envoyer cet appareil');
           pushToCloud();
@@ -6425,7 +6702,7 @@ function listenForCloudChanges(){
       return;
     }
     syncLog('📥 Import depuis session ' + (data._sessionId||'?').slice(0,6) + ' device=' + (data._device||'?'));
-    importCloudData(data);
+    adoptCloudAudit(data);
   }, function(err){
     syncLog('❌ Listener error: ' + err.code + ' — ' + err.message);
   });
@@ -6436,15 +6713,17 @@ function importCloudData(data){
   syncLog('📥 Import des données cloud...');
   try{
     // Réutiliser la logique d'import du transfer code
-    if(data.ad) S.adminData = data.ad;
-    if(data.ac) S.adminChips = data.ac;
-    if(data.sc) S.singleChips = data.sc;
-    if(data.aud) S.auditor = data.aud;
-    if(data.ct) S.counters = data.ct;
-    if(data.co) S.contracts = data.co;
-    if(data.inc) S.incidents = data.inc;
-    if(data.cx) S.capex = data.cx;
-    if(data.rg) S.registre = data.rg;
+    // L'audit reçu remplace entièrement l'audit affiché (Firebase supprime les listes vides)
+    S.adminData = data.ad || {};
+    S.adminChips = data.ac || {};
+    S.singleChips = data.sc || {};
+    S.auditor = data.aud || '';
+    S.counters = data.ct ? Object.values(data.ct) : [];
+    S.contracts = data.co ? Object.values(data.co) : [];
+    S.incidents = data.inc ? Object.values(data.inc) : [];
+    S.capex = data.cx || {};
+    S.registre = data.rg || {};
+    if(!data.cp && !data._noPhotos){ S.coverPhoto = null; try{ localStorage.removeItem('audittech_cover_photo'); }catch(e){} }
     // Restaurer la cover photo si présente
     if(data.cp){
       S.coverPhoto = data.cp;
@@ -6482,9 +6761,8 @@ function importCloudData(data){
     // Sauvegarder localement SANS re-pousser vers le cloud
     saveStateLocal();
     setLocalLastMod(data._lastSync || Date.now());
-    // Rafraîchir la page visible
-    try{ goToPage(_currentPage); }catch(e){}
-    updateProgress();
+    // Rafraîchir tout l'écran (champs Administration compris)
+    refreshAllUI();
     syncLog('✅ Import terminé');
     showToastMsg('☁️ Données synchronisées');
   }catch(e){
@@ -6580,7 +6858,7 @@ function showSyncDiag(){
   h += '<div style="background:#f5f5f5;border-radius:8px;padding:10px;font-size:12px;line-height:1.7;margin-bottom:10px">';
   h += '<b>Compte :</b> ' + (_fbUser ? esc(_fbUser.email) : '❌ non connecté') + '<br>';
   h += '<b>Cet appareil :</b> ' + esc(loc.site) + ' — ' + loc.eq + ' équipements, ' + loc.ph + ' photos<br>';
-  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-10';
+  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-11';
   h += '</div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   h += '<button onclick="diagForcePush()" style="' + btn + 'background:#388e3c">📤 Envoyer cet appareil vers le cloud</button>';
@@ -6633,7 +6911,7 @@ function diagForcePull(){
     var c = summarizeAudit(data.ad, data.tr);
     diagLog('☁️ Cloud : ' + c.site + ' — ' + c.eq + ' équip., ' + c.ph + ' photos (' + (data._device||'?') + ', ' + (data._lastSync ? new Date(data._lastSync).toLocaleString() : '?') + ')');
     if(!confirm('Remplacer les données de cet appareil par la version cloud ?\n\n☁️ ' + c.site + ' — ' + c.eq + ' équipements, ' + c.ph + ' photos')) return;
-    importCloudData(data);
+    adoptCloudAudit(data);
     diagLog('✅ Import terminé');
   }).catch(function(err){
     diagLog('❌ ' + err.code + ' — ' + err.message);
@@ -6794,8 +7072,8 @@ function diagClearCache(){
 <!-- MODAL HISTORIQUE DES AUDITS -->
 <div class="history-modal hidden" id="history-modal" onclick="if(event.target===this)closeHistory()">
   <div class="history-card">
-    <h3>📂 Historique des audits</h3>
-    <div class="h-sub">Sélectionnez un ancien audit pour le restaurer. L'audit en cours sera sauvegardé automatiquement.</div>
+    <h3>🗂 Mes audits</h3>
+    <div class="h-sub">Audits rangés dans cet appareil. Touchez un audit pour l'ouvrir : l'audit ouvert est rangé automatiquement. 💾 enregistre un audit dans un fichier, à garder sur votre ordinateur.</div>
     <div class="history-list" id="history-list"></div>
     <button style="width:100%;padding:12px;border:1px solid var(--border);border-radius:var(--rad-sm);background:var(--surface2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text)" onclick="closeHistory()">Fermer</button>
   </div>
