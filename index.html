@@ -1481,13 +1481,13 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 
         <div class="group-label">Note de risque HSE — Équipements de sécurité</div>
         <div class="card">
-          <div class="card-head"><span class="card-head-icon">🛡️</span> Risque sécurité — domaine HSE uniquement, indépendant de la note technique</div>
+          <div class="card-head"><span class="card-head-icon">🛡️</span> Risque sécurité — incendie, sûreté, sécurisation des personnes · indépendant de la note technique</div>
           <div style="padding:16px 18px">
             <div class="hse-note-wrap">
               <div class="hse-note-badge hse-none" id="hse-note-badge">—</div>
               <div class="hse-note-info">
                 <div class="hse-note-label" id="hse-note-label">Non évalué</div>
-                <div class="hse-note-sub" id="hse-note-sub">Complétez le domaine HSE Équipements techniques de sécurité pour obtenir la note de risque.</div>
+                <div class="hse-note-sub" id="hse-note-sub">Notez au moins un équipement en Sécurité incendie, Sûreté ou Sécurisation des personnes.</div>
               </div>
             </div>
             <div class="hse-scale">
@@ -1498,7 +1498,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
               <div class="hse-scale-item hse-E" id="hse-sc-E">E</div>
             </div>
             <div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.5">
-              Formule : risque = état × 0,6 + criticité × 0,4 (domaine 9). A = risque faible · E = risque critique.
+              Formule : risque = état × 0,6 + criticité × 0,4 (domaines Sécurité incendie, Sûreté, Sécurisation des personnes). A = risque faible · E = risque critique.
             </div>
           </div>
         </div>
@@ -2388,28 +2388,30 @@ function confirmLoc(){
 }
 
 // ============================================================
-// SCORE HSE RISQUE — domaine 9 uniquement, formule inversée
+// SCORE HSE RISQUE — domaines sécurité (l'ancien domaine 9 a été fusionné dans les domaines terrain)
+// 6 = Sécurité incendie, 10 = Sûreté / Contrôle d'accès, 14 = Sécurisation des personnes
 // ============================================================
+const HSE_RISK_DOMAINS = [6, 10, 14];
 function calcHSEScore(){
-  const d9 = S.terrain[9] || S.terrain['9'];
-  if(!d9) return null;
   let total = 0, count = 0;
-  Object.values(d9.equips||{}).forEach(function(eq){
-    if(!eq || !eq.etat) return;
-    // Risque = état (1=bon→faible risque, 3=mauvais→risque élevé) × 0.6 + criticité × 0.4
-    const etatRisk  = eq.etat;                        // 1,2,3
-    const critRisk  = eq.crit ? eq.crit : 1;          // 1,2,3 (défaut 1 si non renseigné)
-    total += etatRisk * 0.6 + critRisk * 0.4;
-    count++;
+  HSE_RISK_DOMAINS.forEach(function(did){
+    const dom = S.terrain[String(did)];
+    if(!dom) return;
+    Object.values(dom.equips||{}).forEach(function(eq){
+      if(!eq || !eq.etat) return;
+      // Risque = état (1=bon→faible risque, 3=mauvais→risque élevé) × 0.6 + criticité × 0.4
+      const critRisk = eq.crit ? eq.crit : 1;          // défaut 1 si non renseigné
+      total += eq.etat * 0.6 + critRisk * 0.4;
+      count++;
+    });
   });
   if(count === 0) return null;
-  // Normaliser sur [0,100] : min=1 (tout bon+sans crit), max=3 (tout mauvais+fort crit)
-  const raw = total / count;           // entre 1 et 3
-  return Math.round((raw - 1) / 2 * 100); // 0% = risque nul, 100% = risque maximum
+  const raw = total / count;               // entre 1 et 3
+  return Math.round((raw - 1) / 2 * 100);  // 0% = risque nul, 100% = risque maximum
 }
 
 function getHSENote(pct){
-  if(pct === null) return {note:'—', lbl:'Non évalué', sub:"Complétez le domaine HSE Équipements techniques de sécurité.", cls:'hse-none'};
+  if(pct === null) return {note:'—', lbl:'Non évalué', sub:"Notez au moins un équipement en Sécurité incendie, Sûreté ou Sécurisation des personnes.", cls:'hse-none'};
   if(pct <= 20)   return {note:'A', lbl:'Risque faible',      sub:'Les équipements de sécurité sont en bon état général.', cls:'hse-A'};
   if(pct <= 40)   return {note:'B', lbl:'Risque modéré',      sub:'Quelques points de vigilance à surveiller.', cls:'hse-B'};
   if(pct <= 60)   return {note:'C', lbl:'Risque significatif',sub:'Des actions correctives sont à planifier.', cls:'hse-C'};
@@ -2573,6 +2575,15 @@ function generatePDF(){
   });
 }
 
+// Un thème a du contenu s'il a au moins un état, une criticité, une observation ou une photo
+function domainHasContent(dData){
+  if(!dData) return false;
+  return Object.values(dData.equips||{}).some(function(eq){
+    if(!eq) return false;
+    return !!(eq.etat || eq.crit || (eq.obs && String(eq.obs).trim()) || (eq.photos && eq.photos.some(function(p){ return p; })));
+  });
+}
+
 function buildPDF(){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
@@ -2717,17 +2728,7 @@ function buildPDF(){
   ];
 
   // Calcul note HSE
-  var hsePct2 = (function(){
-    var d9 = S.terrain[9] || S.terrain['9'];
-    if(!d9) return null;
-    var tot=0, cnt=0;
-    Object.values(d9.equips||{}).forEach(function(eq){
-      if(!eq||!eq.etat) return;
-      tot += eq.etat*0.6 + (eq.crit?eq.crit:1)*0.4;
-      cnt++;
-    });
-    return cnt>0 ? Math.round((tot/cnt - 1)/2*100) : null;
-  })();
+  var hsePct2 = calcHSEScore();
   function getHSENotePDF(pct){
     if(pct===null) return {note:'—',lbl:'Non evalue',col:CGRIS};
     if(pct<=20) return {note:'A',lbl:'Risque faible',col:CVERT};
@@ -3071,6 +3072,8 @@ function buildPDF(){
     if(!dom) return; // domain 9 is null
     var dData=S.terrain[String(dom.id)]; // FIX: clé string
     if(!dData)return;
+    // Gain de place : on n'imprime pas un thème sans aucune notation, remarque ni photo
+    if(!domainHasContent(dData))return;
     doc.addPage();
     pdfHeader(doc,dom.name,CORA,W,ML,MR);
     var dy=MT+28;
@@ -6433,7 +6436,7 @@ function showSyncDiag(){
   h += '<div style="background:#f5f5f5;border-radius:8px;padding:10px;font-size:12px;line-height:1.7;margin-bottom:10px">';
   h += '<b>Compte :</b> ' + (_fbUser ? esc(_fbUser.email) : '❌ non connecté') + '<br>';
   h += '<b>Cet appareil :</b> ' + esc(loc.site) + ' — ' + loc.eq + ' équipements, ' + loc.ph + ' photos<br>';
-  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-5';
+  h += '<b>Écoute cloud :</b> ' + (_fbListener ? '✅' : '❌') + ' &nbsp; <b>Version :</b> sync-6';
   h += '</div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   h += '<button onclick="diagForcePush()" style="' + btn + 'background:#388e3c">📤 Envoyer cet appareil vers le cloud</button>';
