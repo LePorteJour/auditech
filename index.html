@@ -2913,18 +2913,36 @@ function loadJsPDF(cb){
 
 function generatePDF(){
   // FIX: cibler tous les boutons PDF (pas juste le premier trouvé) pour le feedback visuel
-  const btns=Array.from(document.querySelectorAll('.btn-pdf')).filter(b=>b.textContent.includes('PDF')||b.textContent.includes('Génér'));
-  btns.forEach(b=>{b.textContent='⏳ Génération…';b.disabled=true;});
+  const btns=Array.from(document.querySelectorAll('.btn-pdf')).filter(b=>b.textContent.includes('PDF'));
+  const labels=btns.map(b=>b.innerHTML);
+  btns.forEach(b=>{b.textContent='Génération…';b.disabled=true;});
   loadJsPDF(()=>{
     try{buildPDF();}
     catch(e){alert('Erreur PDF : '+e.message);}
     finally{
-      btns.forEach(b=>{b.innerHTML='📄 PDF';b.disabled=false;});
-      // Restaurer le libellé complet sur desktop
-      const desk=document.querySelector('.main-header .btn-pdf');
-      if(desk) desk.innerHTML='📄 Générer le rapport PDF';
+      btns.forEach((b,k)=>{b.innerHTML=labels[k];b.disabled=false;});
     }
   });
+}
+
+// Place une image dans un cadre sans la déformer.
+// mode 'cover' : remplit le cadre, recadrée au centre ; 'contain' : image entière, centrée.
+function pdfImageFit(doc, src, x, y, w, h, mode){
+  var pr = doc.getImageProperties(src);
+  var ir = pr.width / pr.height, br = w / h, dw, dh;
+  if(mode === 'cover' ? ir > br : ir < br){ dh = h; dw = h * ir; } else { dw = w; dh = w / ir; }
+  var dx = x + (w - dw) / 2, dy = y + (h - dh) / 2;
+  var fmt = /^data:image\/png/i.test(src) ? 'PNG' : 'JPEG';
+  if(mode === 'cover'){
+    doc.saveGraphicsState();
+    doc.rect(x, y, w, h, null);
+    doc.clip();
+    doc.discardPath();
+    doc.addImage(src, fmt, dx, dy, dw, dh);
+    doc.restoreGraphicsState();
+  } else {
+    doc.addImage(src, fmt, dx, dy, dw, dh);
+  }
 }
 
 // Un thème a du contenu s'il a au moins un état, une criticité, une observation ou une photo
@@ -3069,9 +3087,9 @@ function buildPDF(){
     try{
       var photoX=60, photoW=W-70;
       // Calculer la hauteur max de photo disponible entre cy+4 et noteY-4
-      var photoMaxH = Math.min(40, noteY - cy - 10);
+      var photoMaxH = Math.min(70, noteY - cy - 16);
       if(photoMaxH > 15){
-        doc.addImage(S.coverPhoto,'JPEG',photoX,cy+4,photoW,photoMaxH);
+        pdfImageFit(doc, S.coverPhoto, photoX, cy+4, photoW, photoMaxH, 'cover');
         doc.setDrawColor(220,217,210);doc.setLineWidth(0.3);
         doc.rect(photoX,cy+4,photoW,photoMaxH);
       }
@@ -3505,7 +3523,8 @@ function buildPDF(){
         if(px+PW>W-MR){px=ML;photoY+=PH+PGAP+10;}
         if(photoY+PH>H-25){pdfFooter(doc,CORA,ML,MR,H,W);doc.addPage();pdfHeader(doc,dom.name+' - Photos',CORA,W,ML,MR);photoY=MT+28;px=ML;}
         try{
-          doc.addImage(p.src,'JPEG',px,photoY,PW,PH);
+          doc.setFillColor(241,243,245);doc.rect(px,photoY,PW,PH,'F');
+          pdfImageFit(doc, p.src, px, photoY, PW, PH, 'contain');
           doc.setDrawColor(220,217,210);doc.setLineWidth(0.2);doc.rect(px,photoY,PW,PH);
           doc.setTextColor(90,90,90);doc.setFontSize(6);doc.setFont('helvetica','normal');
           doc.text(doc.splitTextToSize(p.eq,PW),px,photoY+PH+4);
